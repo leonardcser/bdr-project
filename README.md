@@ -1,1 +1,1 @@
-# bdr-project
+# BDR Project
