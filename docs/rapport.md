@@ -12,6 +12,7 @@ header-includes:
   - \fancyfoot[C]{}
   - \fancyfoot[R]{\thepage}
 toc: true
+lang: fr
 ---
 
 
@@ -20,9 +21,14 @@ toc: true
 
 ## Introduction
 
-Présentez brièvement le projet, son contexte, et les objectifs principaux de l'application.
+Dans le cadre du projet de BDR, nous devons:
+1. Créer le cahier des charges
+2. Modéliser
+3. Implémenter physiquement la bdd
+4. Coder une application
 
 ## 1. Cahier des charges
+[Consulter le cahier des charges au format PDF](cahier-des-charges.pdf)
 
 ### 1.1 Objectif de l'application
 Développer une application pour permettre aux recruteurs de gérer efficacement les processus de recrutement, incluant la gestion des candidats, des postes et des entretiens.
@@ -38,45 +44,53 @@ Développer une application pour permettre aux recruteurs de gérer efficacement
 ## 2. Conception
 
 ### 2.1 Modélisation Conceptuelle (Schéma EA)
-Inclure le schéma conceptuel UML de la base de données. Décrire les principales entités, attributs et relations.
+Le principal défi est le tri des candidats par pertinence pour un poste donné. Il faut définir la limite entre ce qui est stocké dans la base de données et ce qui est retrouvé dans le code. Par exemple, comment quantifier l'expérience, ou la localisation ? Faut-il introduire une notion de distance par rapport à la location de l'offre et la location du candidat ? Dans le code ou dans la bdd ?  
+
+- profile
+- address / lat long
+- interactions:enum?
+- statut table ou enum ? (historique)
+- diplome enum
+- expérience int
+
 
 ### 2.2 Modélisation Relationnelle
-Transformer le schéma conceptuel en un schéma relationnel. Décrire les tables, leurs colonnes, et les contraintes d'intégrité référentielle.
+
 
 ## 3. Implémentation
 
 ### 3.1 Technologies Utilisées
-Lister et expliquer les technologies choisies (PostgreSQL, Java, JDBC, etc.). Justifier les choix effectués.
+
 
 ### 3.2 Structure de l'Application
-Décrire la structure de l'application, y compris les principaux fichiers, répertoires, et modules.
+
 
 ### 3.3 Requêtes SQL
-Inclure des exemples de requêtes SQL importantes utilisées dans l'application, ainsi que des vues, triggers, et procédures stockées.
+
 
 ## 4. Tests
 
 ### 4.1 Stratégie de Test
-Décrire la stratégie de test adoptée : tests unitaires, tests d'intégration, et tests de validation de la base de données.
+
 
 ### 4.2 Résultats des Tests
-Présenter les résultats des tests effectués, y compris les taux de couverture et les éventuels problèmes rencontrés.
+
 
 ## 5. Conclusion
 
 ### 5.1 Bilan
-Faire un bilan du projet, en soulignant les réussites et les défis rencontrés.
+
 
 ### 5.2 Perspectives
-Proposer des améliorations possibles et des perspectives pour le futur développement de l'application.
+
 
 ## Annexes
 
 ### A. Guide d'Installation et de Déploiement
-Fournir des instructions détaillées pour l'installation et le déploiement de l'application.
+
 
 ### B. Manuel Utilisateur
-Inclure un manuel utilisateur pour guider les recruteurs dans l'utilisation de l'application.
+
 
 ### C. Schémas Complémentaires
-Inclure des schémas ou diagrammes supplémentaires qui pourraient être utiles pour la compréhension du projet.
+
