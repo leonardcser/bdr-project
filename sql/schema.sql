@@ -25,6 +25,7 @@ CREATE TABLE Adresse (
     npa VARCHAR(255) NOT NULL,
     pays VARCHAR(255) NOT NULL,
     PRIMARY KEY(id)
+    -- todo check adressse is linked to at least one candidat or adresse.
 );
 
 CREATE TYPE Genre AS ENUM ('Femme', 'Homme', 'Autre');
@@ -124,7 +125,10 @@ CREATE TABLE ContratTravail (
     salaireHoraire FLOAT NOT NULL,
     idOffre INTEGER  NOT NULL UNIQUE,
     PRIMARY KEY(id),
-    CONSTRAINT Fk_idOffre FOREIGN KEY ContratTravail.idOffre REFERENCES Offre.id
+    CONSTRAINT Fk_idOffre FOREIGN KEY ContratTravail.idOffre REFERENCES Offre.id,
+    CHECK (fin IS NULL OR fin > debut),
+    CHECK ((SELECT dateCloture FROM Offre WHERE id = idOffre) NOT NULL AND fin > (SELECT dateCloture FROM Offre WHERE id = idOffre))
+    -- todo : check if offre is linked to a candidat  having statut = embauché
 );
 
 -- May need to add values possible for this enum.
@@ -137,13 +141,16 @@ CREATE TABLE Candidat_Offre (
     statut Statut NOT NULL,
     PRIMARY KEY(idCandidat, idOffre),
     CONSTRAINT Fk_Candidat FOREIGN KEY Candidat_Offre.idCandidat REFERENCES Candidat.idPersonne,
-    CONSTRAINT Fk_Offre FOREIGN KEY Candidat_Offre.idOffre REFERENCES Offre.id
+    CONSTRAINT Fk_Offre FOREIGN KEY Candidat_Offre.idOffre REFERENCES Offre.id,
+    CHECK ((SELECT dateCloture FROM Offre WHERE Offre.id = Candidat_Offre.idOffre) IS NOT NULL OR statut != 'Embauché'),
+    CHECK (datePostulation BETWEEN (SELECT datePublication FROM Offre WHERE Offre.id = Candidat_Offre.idOffre) AND (SELECT dateCloture FROM Offre WHERE Offre.id = Candidat_Offre.idOffre))
 );
 
 CREATE TABLE Domaine (
     id INTEGER serial,
     nom VARCHAR(255) NOT NULL,
     PRIMARY KEY(id)
+    --todo : check domaine is linked to at least one candidat or offre
 );
 
 -- May need to add values possible for this enum
