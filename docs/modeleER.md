@@ -35,7 +35,7 @@ Appel.idInteraction reference Interaction.id
 Entretien(<u>idInteraction</u>, type, durée)  
 Entretien.idInteraction reference Interaction.id  
 
-Offre(<u>id</u>, description, nom, poste, annnéesExpRequises, datePublication, dateCloture, idAdresse)  
+Offre(<u>id</u>, descriptionOffre, nomPoste, annnéesExpRequises, datePublication, dateCloture, idAdresse)  
 Offre.idAdresse reference Adresse.id  
 Offre.idAdresse NOT NULL  
 
