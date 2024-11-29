@@ -8,15 +8,16 @@ DROP SCHEMA IF EXISTS public CASCADE;
 CREATE SCHEMA public;
 
 CREATE TABLE Personne (
-    id INTEGER serial,
+    id serial,
     nom VARCHAR(255) NOT NULL,
     prenom VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     PRIMARY KEY(id)
+    -- todo add necessary triggers for complete disjoint
 );
 
 CREATE TABLE Adresse (
-    id INTEGER serial,
+    id serial,
     -- todo : change float to numeric ?
     latitude FLOAT NOT NULL,
     longitude FLOAT NOT NULL,
@@ -38,14 +39,14 @@ CREATE TABLE Candidat (
     anneesExp SMALLINT NOT NULL,
     idAdresse INTEGER  NOT NULL,
     PRIMARY KEY(idPersonne),
-    CONSTRAINT Fk_Personne FOREIGN KEY Candidat.idPersonne REFERENCES Personne.id,
-    CONSTRAINT Fk_Adresse FOREIGN KEY Candidat.idAdresse REFERENCES Adresse.id  NOT NULL
+    CONSTRAINT Fk_Personne FOREIGN KEY Candidat.idPersonne REFERENCES Personne.id ON DELETE CASACDE ON UPDATE CASCADE,
+    CONSTRAINT Fk_Adresse FOREIGN KEY Candidat.idAdresse REFERENCES Adresse.id  NOT NULL UNIQUE ON DELETE CASACDE ON UPDATE CASCADE 
 );
 
 CREATE TABLE Recruteur (
     idPersonne INTEGER,
     PRIMARY KEY(idPersonne),
-    CONSTRAINT Fk_Personne FOREIGN KEY Recruteur.idPersonne REFERENCES Personne.id
+    CONSTRAINT Fk_Personne FOREIGN KEY Recruteur.idPersonne REFERENCES Personne.id ON DELETE CASACDE ON UPDATE CASCADE
 );
 
 CREATE TABLE Recruteur_Candidat (
@@ -59,10 +60,11 @@ CREATE TABLE Recruteur_Candidat (
 );
 
 CREATE TABLE Interaction (
-    id INTEGER serial,
+    id serial,
     dateInteraction date NOT NULL,
     notesTexte VARCHAR(255) NOT NULL,
-    PRIMARY KEY(id)    
+    PRIMARY KEY(id) 
+    -- todo add necessary triggers for complete disjoint   
 );
 
 CREATE TABLE Recruteur_Interaction (
@@ -107,7 +109,7 @@ CREATE TABLE Entretien (
 );
 
 CREATE TABLE Offre (
-    id INTEGER serial,
+    id serial,
     idAdresse INTEGER NOT NULL,
     descriptionOffre VARCHAR(255),
     nomPoste VARCHAR(255)  NOT NULL,
@@ -115,11 +117,11 @@ CREATE TABLE Offre (
     datePublication date NOT NULL,
     dateCloture date,
     PRIMARY KEY(id), 
-    CONSTRAINT Fk_Adresse FOREIGN KEY Offre.idAdresse REFERENCES Adresse.id    
+    CONSTRAINT Fk_Adresse FOREIGN KEY Offre.idAdresse REFERENCES Adresse.id UNIQUE NOT NULL ON DELETE CASACDE ON UPDATE CASCADE   
 );
 
 CREATE TABLE ContratTravail (
-    id INTEGER serial,
+    id serial,
     debut date NOT NULL,
     fin date,
     salaireHoraire FLOAT NOT NULL,
@@ -147,7 +149,7 @@ CREATE TABLE Candidat_Offre (
 );
 
 CREATE TABLE Domaine (
-    id INTEGER serial,
+    id serial,
     nom VARCHAR(255) NOT NULL,
     PRIMARY KEY(id)
     --todo : check domaine is linked to at least one candidat or offre

@@ -10,7 +10,7 @@ Adresse(<u>id</u>, latitude, longitude, rue, ville, npa, pays)
 Candidat(<u>idPersonne</u>, age, genre, numeroTel, annéesExp, idAdresse)  
 Candidat.idPersonne reference Personne.id  
 Candidat.idAdresse reference Adresse.id
-Candidat.idAdresse NOT NULL
+Candidat.idAdresse NOT NULL UNIQUE
 
 Recruteur_Candidat(<u>idRecruteur, idCandidat</u>)  
 Recruteur_Candidat.idRecruteur reference Recruteur.idPersonne  
@@ -37,7 +37,7 @@ Entretien.idInteraction reference Interaction.id
 
 Offre(<u>id</u>, descriptionOffre, nomPoste, annnéesExpRequises, datePublication, dateCloture, idAdresse)  
 Offre.idAdresse reference Adresse.id  
-Offre.idAdresse NOT NULL  
+Offre.idAdresse NOT NULL UNIQUE
 
 ContratTravail(<u>id</u>, début, fin, salaireHoraire, idOffre)  
 ContratTravail.idOffre reference Offre.id  

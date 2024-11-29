@@ -52,7 +52,8 @@ Le principal défi est le tri des candidats par pertinence pour un poste donné.
 - statut table ou enum ? (historique)
 - diplome enum
 - expérience int
-
+ 
+ TODO : supprimer un recruteur est impossible.
 
 ### 2.2 Modélisation Relationnelle
 

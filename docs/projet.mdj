@@ -4117,9 +4117,9 @@
 										"$ref": "AAAAAAGS51VMJNMDoYs="
 									},
 									"font": "Arial;13;0",
-									"left": 276,
+									"left": 268,
 									"top": 444,
-									"width": 5.05908203125,
+									"width": 21.68359375,
 									"height": 13,
 									"autoResize": true,
 									"alpha": -0.5235987755982988,
@@ -4128,7 +4128,7 @@
 										"$ref": "AAAAAAGS51VMJNMG0bc="
 									},
 									"edgePosition": 2,
-									"text": "*"
+									"text": "0..1"
 								},
 								{
 									"_type": "EdgeLabelView",
@@ -7272,7 +7272,7 @@
 								"reference": {
 									"$ref": "AAAAAAGSn2pd37i4GWY="
 								},
-								"multiplicity": "*"
+								"multiplicity": "0..1"
 							},
 							"end2": {
 								"_type": "UMLAssociationEnd",
@@ -7416,7 +7416,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGSn2pd37i4GWY="
 							},
-							"name": "numeroTel"
+							"name": "numeroTel",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -7433,7 +7434,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGSn2pd37i4GWY="
 							},
-							"name": "annéesExp"
+							"name": "annéesExp",
+							"type": ""
 						}
 					]
 				},
@@ -7812,7 +7814,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGSn21w4bvqfZI="
 							},
-							"name": "nomPoste"
+							"name": "nomPoste",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -7820,7 +7823,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGSn21w4bvqfZI="
 							},
-							"name": "annéesExpRequises"
+							"name": "annéesExpRequises",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -7828,7 +7832,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGSn21w4bvqfZI="
 							},
-							"name": "datePublication"
+							"name": "datePublication",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -7836,7 +7841,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGSn21w4bvqfZI="
 							},
-							"name": "dateCloture [0..1]"
+							"name": "dateCloture [0..1]",
+							"type": ""
 						}
 					]
 				},
@@ -7939,7 +7945,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGSn29d+r1wRYU="
 							},
-							"name": "notesTexte"
+							"name": "notesTexte",
+							"type": ""
 						}
 					]
 				},
@@ -8707,7 +8714,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGTAryyddrU07E="
 							},
-							"name": "salaireHoraire"
+							"name": "salaireHoraire",
+							"type": ""
 						}
 					]
 				},
@@ -8766,7 +8774,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGTC841KPjPWS8="
 							},
-							"name": "datePostulation"
+							"name": "datePostulation",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
