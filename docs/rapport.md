@@ -132,130 +132,149 @@ Candidat_Domaine.idDomaine reference Domaine.id
 ### Stratégies ON DELETE et ON UPDATE
 
 #### Candidat
+
 ```sql
-CONSTRAINT FK_Personne 
-FOREIGN KEY (idPersonne) 
-REFERENCES Personne(id) 
-ON DELETE CASCADE 
+CONSTRAINT FK_Personne
+FOREIGN KEY (idPersonne)
+REFERENCES Personne(id)
+ON DELETE CASCADE
 ON UPDATE CASCADE
 
-CONSTRAINT FK_Adresse 
-FOREIGN KEY (idAdresse) 
-REFERENCES Adresse(id) 
-ON DELETE RESTRICT 
+CONSTRAINT FK_Adresse
+FOREIGN KEY (idAdresse)
+REFERENCES Adresse(id)
+ON DELETE RESTRICT
 ON UPDATE NO ACTION
 ```
+
 - **Personne :** Si une personne est supprimée, le profil de candidat est également supprimé. Cela garantit qu'un candidat ne peut pas exister sans une identité personnelle de base.
 - **Adresse :** L'adresse ne peut pas être supprimée si un candidat y est associé, afin de préserver l'intégrité des données historiques.
 
 #### Recruteur
+
 ```sql
-FOREIGN KEY (idPersonne) 
-REFERENCES Personne(id) 
-ON DELETE CASCADE 
+FOREIGN KEY (idPersonne)
+REFERENCES Personne(id)
+ON DELETE CASCADE
 ON UPDATE CASCADE
 ```
+
 - Similaire au Candidat : si la personne est supprimée, son profil de recruteur est également supprimé.
 
 #### Recruteur_Candidat
+
 ```sql
-CONSTRAINT FK_Recruteur 
-FOREIGN KEY (idRecruteur) 
-REFERENCES Recruteur(idPersonne) 
-ON DELETE RESTRICT 
+CONSTRAINT FK_Recruteur
+FOREIGN KEY (idRecruteur)
+REFERENCES Recruteur(idPersonne)
+ON DELETE RESTRICT
 ON UPDATE CASCADE
 
-CONSTRAINT FK_Candidat 
-FOREIGN KEY (idCandidat) 
-REFERENCES Candidat(idPersonne) 
-ON DELETE RESTRICT 
+CONSTRAINT FK_Candidat
+FOREIGN KEY (idCandidat)
+REFERENCES Candidat(idPersonne)
+ON DELETE RESTRICT
 ON UPDATE CASCADE
 ```
+
 - Empêche la suppression d'un recruteur ou d'un candidat s'il existe des relations professionnelles entre eux.
 - Autorise la mise à jour des identifiants si nécessaire.
 
 #### Interactions (Emails, Appels, Entretiens)
+
 ```sql
-FOREIGN KEY (idInteraction) 
-REFERENCES Interaction(id) 
-ON DELETE CASCADE 
+FOREIGN KEY (idInteraction)
+REFERENCES Interaction(id)
+ON DELETE CASCADE
 ON UPDATE CASCADE
 ```
+
 - Les interactions spécialisées (email, appel, entretien) sont supprimées si l'interaction parent est supprimée.
 - Permet de maintenir la cohérence des types d'interactions.
 
 #### Recruteur_Interaction et Candidat_Interaction
+
 ```sql
-CONSTRAINT FK_Recruteur/Candidat 
-FOREIGN KEY (idRecruteur/idCandidat) 
-REFERENCES Recruteur/Candidat(idPersonne) 
-ON DELETE RESTRICT 
+CONSTRAINT FK_Recruteur/Candidat
+FOREIGN KEY (idRecruteur/idCandidat)
+REFERENCES Recruteur/Candidat(idPersonne)
+ON DELETE RESTRICT
 ON UPDATE CASCADE
 
-CONSTRAINT FK_Interaction 
-FOREIGN KEY (idInteraction) 
-REFERENCES Interaction(id) 
-ON DELETE RESTRICT 
+CONSTRAINT FK_Interaction
+FOREIGN KEY (idInteraction)
+REFERENCES Interaction(id)
+ON DELETE RESTRICT
 ON UPDATE CASCADE
 ```
+
 - Empêche la suppression d'un recruteur ou candidat s'il a des interactions historiques.
 - Interdit la suppression d'interactions liées à des personnes.
 
 #### Offre
+
 ```sql
-CONSTRAINT FK_Adresse 
-FOREIGN KEY (idAdresse) 
-REFERENCES Adresse(id) 
-ON DELETE RESTRICT 
+CONSTRAINT FK_Adresse
+FOREIGN KEY (idAdresse)
+REFERENCES Adresse(id)
+ON DELETE RESTRICT
 ON UPDATE NO ACTION
 ```
+
 - L'adresse associée à une offre ne peut pas être supprimée, préservant la localisation historique de l'offre.
 
 #### Contrat_Travail
+
 ```sql
-CONSTRAINT FK_Contrat_Travail 
-FOREIGN KEY (idOffre) 
-REFERENCES Offre(id) 
-ON DELETE RESTRICT 
+CONSTRAINT FK_Contrat_Travail
+FOREIGN KEY (idOffre)
+REFERENCES Offre(id)
+ON DELETE RESTRICT
 ON UPDATE NO ACTION
 ```
+
 - Un contrat ne peut pas être lié à une offre supprimée, garantissant l'intégrité des références.
 
 #### Candidat_Offre
+
 ```sql
-CONSTRAINT FK_Candidat 
-FOREIGN KEY (idCandidat) 
-REFERENCES Candidat(idPersonne) 
-ON DELETE RESTRICT 
+CONSTRAINT FK_Candidat
+FOREIGN KEY (idCandidat)
+REFERENCES Candidat(idPersonne)
+ON DELETE RESTRICT
 ON UPDATE CASCADE
 
-CONSTRAINT FK_Offre 
-FOREIGN KEY (idOffre) 
-REFERENCES Offre(id) 
-ON DELETE RESTRICT 
+CONSTRAINT FK_Offre
+FOREIGN KEY (idOffre)
+REFERENCES Offre(id)
+ON DELETE RESTRICT
 ON UPDATE NO ACTION
 ```
+
 - Empêche la suppression d'un candidat ayant postulé à des offres.
 - Interdit la modification de l'offre une fois les candidatures enregistrées.
 
 #### Offre_Domaine et Candidat_Domaine
+
 ```sql
-CONSTRAINT FK_Offre/Candidat 
-FOREIGN KEY (idOffre/idCandidat) 
-REFERENCES Offre/Candidat(id) 
-ON DELETE RESTRICT 
+CONSTRAINT FK_Offre/Candidat
+FOREIGN KEY (idOffre/idCandidat)
+REFERENCES Offre/Candidat(id)
+ON DELETE RESTRICT
 ON UPDATE NO ACTION
 
-CONSTRAINT FK_Domaine 
-FOREIGN KEY (idDomaine) 
-REFERENCES Domaine(id) 
-ON DELETE RESTRICT 
+CONSTRAINT FK_Domaine
+FOREIGN KEY (idDomaine)
+REFERENCES Domaine(id)
+ON DELETE RESTRICT
 ON UPDATE NO ACTION
 ```
+
 - Préserve l'intégrité des liens entre offres/candidats et domaines.
 - Empêche la suppression de domaines sans considérer leurs relations existantes.
 
 Ces choix de contraintes visent à :
+
 - Maintenir l'intégrité référentielle
 - Prévenir les suppressions accidentelles
 - Conserver un historique fiable
@@ -297,7 +316,7 @@ Ces choix de contraintes visent à :
   1. Un statut 'Embauché' nécessite une date de clôture d'offre
   2. La date de postulation doit être entre la date de publication et la date de clôture de l'offre
 - **Déclenchement :** Avant l'insertion ou la mise à jour dans la table Candidat_Offre
-- **Vérification :** 
+- **Vérification :**
   - Vérifie la cohérence du statut 'Embauché' avec la date de clôture
   - Contrôle que la date de postulation est dans la période valide de l'offre
 - **Action :** Lève une exception si l'une des conditions n'est pas respectée
@@ -313,35 +332,57 @@ Tous ces triggers visent à maintenir la cohérence et l'intégrité des donnée
 
 ### Contraintes Métier
 
-#### Validation d'Âge
+#### Validation d'Âge des Candidats
 
 ```sql
 CHECK (age >= 16 AND age < 100)
 ```
 
-Limite l'âge des candidats à un intervalle réaliste
+- **Objectif :** Garantir un intervalle d'âge réaliste pour les candidats
+- **Plage :** Entre 16 et 99 ans
+- **Logique :** Exclut les candidats potentiellement trop jeunes ou irréalistement âgés
 
-#### Dates de Publication et Clôture
+#### Validation des Coordonnées Géographiques (Adresse)
+
+```sql
+CHECK (latitude > -90 AND latitude < 90)
+CHECK (longitude > -180 AND longitude < 180)
+```
+
+- **Objectif :** Assurer des coordonnées géographiques valides
+- **Latitude :** Comprise entre -90° et 90° (pôles Nord et Sud)
+- **Longitude :** Comprise entre -180° et 180° (méridien de Greenwich)
+- **Logique :** Correspond aux limites physiques de la Terre
+
+#### Validation des Dates de Contrat de Travail
+
+```sql
+CHECK (fin IS NULL OR fin > debut)
+```
+
+- **Objectif :** Garantir la cohérence des dates de contrat
+- **Condition :** Si une date de fin est spécifiée, elle doit être postérieure à la date de début
+- **Flexibilité :** Permet des contrats sans date de fin (contrats indéterminés)
+
+#### Validation du Salaire Horaire
+
+```sql
+CHECK (salaireHoraire > 0)
+```
+
+- **Objectif :** Assurer un salaire horaire positif
+- **Condition :** Le salaire doit être strictement supérieur à zéro
+- **Logique :** Exclut les valeurs nulles ou négatives
+
+#### Validation des Dates de Publication et Clôture d'Offre
 
 ```sql
 CHECK (dateCloture IS NULL OR dateCloture > datePublication)
 ```
 
-Garantit la cohérence temporelle des offres
-
-#### Gestion des Domaines
-
-- Trigger vérifiant qu'un domaine est lié à au moins un candidat ou une offre
-- Prévient la création de domaines orphelins
-
-#### Géolocalisation
-
-```sql
-CHECK (latitude > -90 AND latitude < 90),
-CHECK (longitude > -180 AND longitude < 180)
-```
-
-Validation des coordonnées géographiques
+- **Objectif :** Garantir la logique temporelle des offres
+- **Condition :** Si une date de clôture existe, elle doit être postérieure à la date de publication
+- **Flexibilité :** Autorise des offres sans date de clôture
 
 # Implémentation
 
