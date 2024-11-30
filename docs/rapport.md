@@ -44,16 +44,29 @@ Développer une application pour permettre aux recruteurs de gérer efficacement
 
 # Conception
 
+## Entités Principales
+
+- **Personne**: Entité racine représentant tous les acteurs du système
+- **Candidat**: Spécialisation de Personne, représentant les candidats
+- **Recruteur**: Spécialisation de Personne, représentant les recruteurs
+- **Interaction**: Modélise les différents types de communications
+- **Offre**: Représente les opportunités d'emploi
+- **Domaine**: Catégorise les compétences et secteurs d'activité
+
+\pagebreak
+
 ## Modélisation Conceptuelle (Schéma EA)
 
-Le principal défi est le tri des candidats par pertinence pour un poste donné. Il faut définir la limite entre ce qui est stocké dans la base de données et ce qui est retrouvé dans le code. Par exemple, comment quantifier l'expérience, ou la localisation ? Faut-il introduire une notion de distance par rapport à la location de l'offre et la location du candidat ? Dans le code ou dans la bdd ?
+<!-- Le principal défi est le tri des candidats par pertinence pour un poste donné. Il faut définir la limite entre ce qui est stocké dans la base de données et ce qui est retrouvé dans le code. Par exemple, comment quantifier l'expérience, ou la localisation ? Faut-il introduire une notion de distance par rapport à la location de l'offre et la location du candidat ? Dans le code ou dans la bdd ?
 
 - profile
 - address / lat long
 - interactions:enum?
 - statut table ou enum ? (historique)
 - diplome enum
-- expérience int
+- expérience int -->
+
+![Schema EA](ea.png)
 
 ## Modélisation Relationnelle
 
@@ -113,6 +126,222 @@ Offre_Domaine.idDomaine reference Domaine.id
 Candidat_Domaine(\underline{idCandidat, idDomaine}, diplomePossede)
 Candidat_Domaine.idCandidat reference Candidat.idPersonne
 Candidat_Domaine.idDomaine reference Domaine.id
+
+## Contraintes et Intégrités Référentielles
+
+### Stratégies ON DELETE et ON UPDATE
+
+#### Candidat
+```sql
+CONSTRAINT FK_Personne 
+FOREIGN KEY (idPersonne) 
+REFERENCES Personne(id) 
+ON DELETE CASCADE 
+ON UPDATE CASCADE
+
+CONSTRAINT FK_Adresse 
+FOREIGN KEY (idAdresse) 
+REFERENCES Adresse(id) 
+ON DELETE RESTRICT 
+ON UPDATE NO ACTION
+```
+- **Personne :** Si une personne est supprimée, le profil de candidat est également supprimé. Cela garantit qu'un candidat ne peut pas exister sans une identité personnelle de base.
+- **Adresse :** L'adresse ne peut pas être supprimée si un candidat y est associé, afin de préserver l'intégrité des données historiques.
+
+#### Recruteur
+```sql
+FOREIGN KEY (idPersonne) 
+REFERENCES Personne(id) 
+ON DELETE CASCADE 
+ON UPDATE CASCADE
+```
+- Similaire au Candidat : si la personne est supprimée, son profil de recruteur est également supprimé.
+
+#### Recruteur_Candidat
+```sql
+CONSTRAINT FK_Recruteur 
+FOREIGN KEY (idRecruteur) 
+REFERENCES Recruteur(idPersonne) 
+ON DELETE RESTRICT 
+ON UPDATE CASCADE
+
+CONSTRAINT FK_Candidat 
+FOREIGN KEY (idCandidat) 
+REFERENCES Candidat(idPersonne) 
+ON DELETE RESTRICT 
+ON UPDATE CASCADE
+```
+- Empêche la suppression d'un recruteur ou d'un candidat s'il existe des relations professionnelles entre eux.
+- Autorise la mise à jour des identifiants si nécessaire.
+
+#### Interactions (Emails, Appels, Entretiens)
+```sql
+FOREIGN KEY (idInteraction) 
+REFERENCES Interaction(id) 
+ON DELETE CASCADE 
+ON UPDATE CASCADE
+```
+- Les interactions spécialisées (email, appel, entretien) sont supprimées si l'interaction parent est supprimée.
+- Permet de maintenir la cohérence des types d'interactions.
+
+#### Recruteur_Interaction et Candidat_Interaction
+```sql
+CONSTRAINT FK_Recruteur/Candidat 
+FOREIGN KEY (idRecruteur/idCandidat) 
+REFERENCES Recruteur/Candidat(idPersonne) 
+ON DELETE RESTRICT 
+ON UPDATE CASCADE
+
+CONSTRAINT FK_Interaction 
+FOREIGN KEY (idInteraction) 
+REFERENCES Interaction(id) 
+ON DELETE RESTRICT 
+ON UPDATE CASCADE
+```
+- Empêche la suppression d'un recruteur ou candidat s'il a des interactions historiques.
+- Interdit la suppression d'interactions liées à des personnes.
+
+#### Offre
+```sql
+CONSTRAINT FK_Adresse 
+FOREIGN KEY (idAdresse) 
+REFERENCES Adresse(id) 
+ON DELETE RESTRICT 
+ON UPDATE NO ACTION
+```
+- L'adresse associée à une offre ne peut pas être supprimée, préservant la localisation historique de l'offre.
+
+#### Contrat_Travail
+```sql
+CONSTRAINT FK_Contrat_Travail 
+FOREIGN KEY (idOffre) 
+REFERENCES Offre(id) 
+ON DELETE RESTRICT 
+ON UPDATE NO ACTION
+```
+- Un contrat ne peut pas être lié à une offre supprimée, garantissant l'intégrité des références.
+
+#### Candidat_Offre
+```sql
+CONSTRAINT FK_Candidat 
+FOREIGN KEY (idCandidat) 
+REFERENCES Candidat(idPersonne) 
+ON DELETE RESTRICT 
+ON UPDATE CASCADE
+
+CONSTRAINT FK_Offre 
+FOREIGN KEY (idOffre) 
+REFERENCES Offre(id) 
+ON DELETE RESTRICT 
+ON UPDATE NO ACTION
+```
+- Empêche la suppression d'un candidat ayant postulé à des offres.
+- Interdit la modification de l'offre une fois les candidatures enregistrées.
+
+#### Offre_Domaine et Candidat_Domaine
+```sql
+CONSTRAINT FK_Offre/Candidat 
+FOREIGN KEY (idOffre/idCandidat) 
+REFERENCES Offre/Candidat(id) 
+ON DELETE RESTRICT 
+ON UPDATE NO ACTION
+
+CONSTRAINT FK_Domaine 
+FOREIGN KEY (idDomaine) 
+REFERENCES Domaine(id) 
+ON DELETE RESTRICT 
+ON UPDATE NO ACTION
+```
+- Préserve l'intégrité des liens entre offres/candidats et domaines.
+- Empêche la suppression de domaines sans considérer leurs relations existantes.
+
+Ces choix de contraintes visent à :
+- Maintenir l'intégrité référentielle
+- Prévenir les suppressions accidentelles
+- Conserver un historique fiable
+- Permettre des mises à jour contrôlées des données
+
+### Triggers de Validation
+
+#### `check_personne()`
+
+- **Objectif :** Garantir qu'un Candidat ou un Recruteur ne peut être créé que si l'identifiant de personne existe déjà
+- **Déclenchement :** Après l'insertion dans les tables Candidat et Recruteur
+- **Vérification :** Vérifie que l'`idPersonne` n'est pas null et existe dans la table Personne
+- **Action :** Lève une exception si la condition n'est pas respectée
+
+#### `check_interaction()`
+
+- **Objectif :** Assurer que les interactions spécialisées (Email, Appel, Entretien) sont liées à une interaction principale existante
+- **Déclenchement :** Après l'insertion dans les tables Interaction_Email, Interaction_Appel, Interaction_Entretien
+- **Vérification :** Confirme que l'`idInteraction` n'est pas null et existe dans la table Interaction
+- **Action :** Lève une exception si la condition n'est pas respectée
+
+#### `check_contrat_embauche()`
+
+- **Objectif :** Empêcher la création d'un contrat de travail sans candidat embauché
+- **Déclenchement :** Avant l'insertion dans la table Contrat_Travail
+- **Vérification :** Vérifie qu'il existe au moins un candidat avec le statut 'Embauché' pour l'offre
+- **Action :** Lève une exception si aucun candidat n'a été embauché
+
+#### `check_fin_after_cloture()`
+
+- **Objectif :** Garantir que la date de fin du contrat est postérieure à la date de clôture de l'offre
+- **Déclenchement :** Avant l'insertion ou la mise à jour dans la table Contrat_Travail
+- **Vérification :** Compare la date de fin du contrat avec la date de clôture de l'offre
+- **Action :** Lève une exception si la date de fin est antérieure ou égale à la date de clôture
+
+#### `check_candidat_offre_constraints()`
+
+- **Objectif :** Valider les candidatures selon plusieurs contraintes
+  1. Un statut 'Embauché' nécessite une date de clôture d'offre
+  2. La date de postulation doit être entre la date de publication et la date de clôture de l'offre
+- **Déclenchement :** Avant l'insertion ou la mise à jour dans la table Candidat_Offre
+- **Vérification :** 
+  - Vérifie la cohérence du statut 'Embauché' avec la date de clôture
+  - Contrôle que la date de postulation est dans la période valide de l'offre
+- **Action :** Lève une exception si l'une des conditions n'est pas respectée
+
+#### `check_domaine_link()`
+
+- **Objectif :** S'assurer qu'un domaine est lié soit à un candidat, soit à une offre
+- **Déclenchement :** Après l'insertion ou la mise à jour dans la table Domaine
+- **Vérification :** Compte les liens avec des candidats et des offres
+- **Action :** Lève une exception si aucun lien n'est trouvé
+
+Tous ces triggers visent à maintenir la cohérence et l'intégrité des données du système de gestion de candidatures.
+
+### Contraintes Métier
+
+#### Validation d'Âge
+
+```sql
+CHECK (age >= 16 AND age < 100)
+```
+
+Limite l'âge des candidats à un intervalle réaliste
+
+#### Dates de Publication et Clôture
+
+```sql
+CHECK (dateCloture IS NULL OR dateCloture > datePublication)
+```
+
+Garantit la cohérence temporelle des offres
+
+#### Gestion des Domaines
+
+- Trigger vérifiant qu'un domaine est lié à au moins un candidat ou une offre
+- Prévient la création de domaines orphelins
+
+#### Géolocalisation
+
+```sql
+CHECK (latitude > -90 AND latitude < 90),
+CHECK (longitude > -180 AND longitude < 180)
+```
+
+Validation des coordonnées géographiques
 
 # Implémentation
 

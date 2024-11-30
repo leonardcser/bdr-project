@@ -53,7 +53,7 @@ CREATE TABLE Candidat (
     idAdresse INTEGER NOT NULL UNIQUE,
     CONSTRAINT PK_Candidat PRIMARY KEY(idPersonne),
     CONSTRAINT FK_Personne FOREIGN KEY (idPersonne) REFERENCES Personne(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FK_Adresse FOREIGN KEY (idAdresse) REFERENCES Adresse(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FK_Adresse FOREIGN KEY (idAdresse) REFERENCES Adresse(id) ON DELETE RESTRICT ON UPDATE NO_ACTION,
     CHECK (age >= 16 AND age < 100)
 );
 
@@ -79,8 +79,8 @@ CREATE TABLE Recruteur_Candidat (
     idRecruteur INTEGER NOT NULL,
     idCandidat INTEGER NOT NULL,
     CONSTRAINT PK_Recruteur_Candidat PRIMARY KEY(idRecruteur, idCandidat),
-    CONSTRAINT FK_Recruteur FOREIGN KEY (idRecruteur) REFERENCES Recruteur(idPersonne) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FK_Candidat FOREIGN KEY (idCandidat) REFERENCES Candidat(idPersonne) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT FK_Recruteur FOREIGN KEY (idRecruteur) REFERENCES Recruteur(idPersonne) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT FK_Candidat FOREIGN KEY (idCandidat) REFERENCES Candidat(idPersonne) ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 CREATE TABLE Interaction (
@@ -150,16 +150,16 @@ CREATE TABLE Recruteur_Interaction (
     idRecruteur INTEGER NOT NULL,
     idInteraction INTEGER NOT NULL,
     CONSTRAINT PK_Recruteur_Interaction PRIMARY KEY(idRecruteur, idInteraction),
-    CONSTRAINT FK_Recruteur FOREIGN KEY (idRecruteur) REFERENCES Recruteur(idPersonne) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FK_Interaction FOREIGN KEY (idInteraction) REFERENCES Interaction(id) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT FK_Recruteur FOREIGN KEY (idRecruteur) REFERENCES Recruteur(idPersonne) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT FK_Interaction FOREIGN KEY (idInteraction) REFERENCES Interaction(id) ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 CREATE TABLE Candidat_Interaction (
     idCandidat INTEGER NOT NULL,
     idInteraction INTEGER NOT NULL,
     CONSTRAINT PK_Candidat_Interaction PRIMARY KEY(idCandidat, idInteraction),
-    CONSTRAINT FK_Candidat FOREIGN KEY (idCandidat) REFERENCES Candidat(idPersonne) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FK_Interaction FOREIGN KEY (idInteraction) REFERENCES Interaction(id) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT FK_Candidat FOREIGN KEY (idCandidat) REFERENCES Candidat(idPersonne) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT FK_Interaction FOREIGN KEY (idInteraction) REFERENCES Interaction(id) ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 CREATE TABLE Offre (
@@ -171,7 +171,7 @@ CREATE TABLE Offre (
     datePublication date NOT NULL,
     dateCloture date,
     CONSTRAINT PK_Offre PRIMARY KEY(id),
-    CONSTRAINT FK_Adresse FOREIGN KEY (idAdresse) REFERENCES Adresse(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FK_Adresse FOREIGN KEY (idAdresse) REFERENCES Adresse(id) ON DELETE RESTRICT ON UPDATE NO_ACTION,
     CHECK (dateCloture IS NULL OR dateCloture > datePublication)
 );
 
@@ -183,7 +183,7 @@ CREATE TABLE Contrat_Travail (
     salaireHoraire FLOAT NOT NULL,
     idOffre INTEGER NOT NULL UNIQUE,
     CONSTRAINT PK_Contrat_Travail PRIMARY KEY(id),
-    CONSTRAINT FK_Contrat_Travail FOREIGN KEY (idOffre) REFERENCES Offre(id),
+    CONSTRAINT FK_Contrat_Travail FOREIGN KEY (idOffre) REFERENCES Offre(id) ON DELETE RESTRICT ON UPDATE NO_ACTION,
     CHECK (fin IS NULL OR fin > debut),
     CHECK (salaireHoraire > 0)
 );
@@ -239,8 +239,8 @@ CREATE TABLE Candidat_Offre (
     datePostulation date NOT NULL,
     statut Statut NOT NULL,
     CONSTRAINT PK_Candidat_Offre PRIMARY KEY(idCandidat, idOffre),
-    CONSTRAINT FK_Candidat FOREIGN KEY (idCandidat) REFERENCES Candidat(idPersonne) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FK_Offre FOREIGN KEY (idOffre) REFERENCES Offre(id) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT FK_Candidat FOREIGN KEY (idCandidat) REFERENCES Candidat(idPersonne) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT FK_Offre FOREIGN KEY (idOffre) REFERENCES Offre(id) ON DELETE RESTRICT ON UPDATE NO_ACTION
 );
 
 CREATE OR REPLACE FUNCTION check_candidat_offre_constraints()
@@ -318,8 +318,8 @@ CREATE TABLE Offre_Domaine (
     idDomaine INTEGER NOT NULL,
     diplomeRecherche Diplome NOT NULL,
     CONSTRAINT PK_Offre_Domaine PRIMARY KEY(idOffre, idDomaine),
-    CONSTRAINT FK_Offre FOREIGN KEY (idOffre) REFERENCES Offre(id),
-    CONSTRAINT FK_Domaine FOREIGN KEY (idDomaine) REFERENCES Domaine(id)
+    CONSTRAINT FK_Offre FOREIGN KEY (idOffre) REFERENCES Offre(id) ON DELETE RESTRICT ON UPDATE NO_ACTION,
+    CONSTRAINT FK_Domaine FOREIGN KEY (idDomaine) REFERENCES Domaine(id) ON DELETE RESTRICT ON UPDATE NO_ACTION
 );
 
 CREATE TABLE Candidat_Domaine (
@@ -327,6 +327,6 @@ CREATE TABLE Candidat_Domaine (
     idDomaine INTEGER NOT NULL,
     diplomePossede Diplome NOT NULL,
     CONSTRAINT PK_Candidat_Domaine PRIMARY KEY(idCandidat, idDomaine),
-    CONSTRAINT FK_Candidat FOREIGN KEY (idCandidat) REFERENCES Candidat(idPersonne),
-    CONSTRAINT FK_Domaine FOREIGN KEY (idDomaine) REFERENCES Domaine(id)
+    CONSTRAINT FK_Candidat FOREIGN KEY (idCandidat) REFERENCES Candidat(idPersonne) ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT FK_Domaine FOREIGN KEY (idDomaine) REFERENCES Domaine(id) ON DELETE RESTRICT ON UPDATE NO_ACTION
 );
