@@ -15,7 +15,33 @@ CREATE TABLE Personne (
     CONSTRAINT PK_Personne PRIMARY KEY(id)
 );
 
-CREATE OR REPLACE FUNCTION check_personne() 
+CREATE OR REPLACE FUNCTION check_personne()
+RETURNS TRIGGER
+LANGUAGE plpgsql 
+AS $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM Candidat 
+        WHERE idPersonne = NEW.id
+    ) AND NOT EXISTS (
+        SELECT 1
+        FROM Recruteur
+        WHERE idPersonne = NEW.id
+    ) THEN
+        RAISE EXCEPTION 'A person must be associated with a candidat or recruteur within the same transaction';
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+CREATE CONSTRAINT TRIGGER trg_check_personne
+AFTER INSERT ON Personne
+DEFERRABLE INITIALLY DEFERRED
+FOR EACH ROW 
+EXECUTE FUNCTION check_personne();
+
+CREATE OR REPLACE FUNCTION check_personne_exists() 
 RETURNS TRIGGER 
 LANGUAGE plpgsql 
 AS $$
@@ -57,11 +83,11 @@ CREATE TABLE Candidat (
     CHECK (age >= 16 AND age < 100)
 );
 
-CREATE CONSTRAINT TRIGGER trg_check_personne_candidat
+CREATE CONSTRAINT TRIGGER trg_check_personne_exists_candidat
 AFTER INSERT ON Candidat
 DEFERRABLE INITIALLY DEFERRED
 FOR EACH ROW
-EXECUTE FUNCTION check_personne();
+EXECUTE FUNCTION check_personne_exists();
 
 CREATE TABLE Recruteur (
     idPersonne INTEGER,
@@ -69,11 +95,11 @@ CREATE TABLE Recruteur (
     CONSTRAINT FK_Personne FOREIGN KEY (idPersonne) REFERENCES Personne(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE CONSTRAINT TRIGGER trg_check_personne_recruteur
+CREATE CONSTRAINT TRIGGER trg_check_personne_exists_recruteur
 AFTER INSERT ON Recruteur
 DEFERRABLE INITIALLY DEFERRED
 FOR EACH ROW
-EXECUTE FUNCTION check_personne();
+EXECUTE FUNCTION check_personne_exists();
 
 CREATE TABLE Recruteur_Candidat (
     idRecruteur INTEGER NOT NULL,
@@ -95,7 +121,37 @@ RETURNS TRIGGER
 LANGUAGE plpgsql 
 AS $$
 BEGIN
-     IF NEW.idInteraction IS NULL OR NOT EXISTS (
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM Interaction_Email
+        WHERE idInteraction = NEW.id
+    ) AND NOT EXISTS (
+        SELECT 1
+        FROM Interaction_Appel
+        WHERE idInteraction = NEW.id
+    ) AND NOT EXISTS (
+        SELECT 1
+        FROM Interaction_Entretien
+        WHERE idInteraction = NEW.id
+    ) THEN
+        RAISE EXCEPTION 'An interaction must be associated with a email, appel or entretien within the same transaction';
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+CREATE CONSTRAINT TRIGGER trg_check_interaction
+AFTER INSERT ON Interaction
+DEFERRABLE INITIALLY DEFERRED
+FOR EACH ROW
+EXECUTE FUNCTION check_interaction();
+
+CREATE OR REPLACE FUNCTION check_interaction_exists() 
+RETURNS TRIGGER 
+LANGUAGE plpgsql 
+AS $$
+BEGIN
+    IF NEW.idInteraction IS NULL OR NOT EXISTS (
         SELECT 1 FROM Interaction WHERE id = NEW.idInteraction
     ) THEN
         RAISE EXCEPTION 'Missing interaction ID: %', NEW.idInteraction;
@@ -111,11 +167,11 @@ CREATE TABLE Interaction_Email (
     CONSTRAINT FK_Interaction FOREIGN KEY (idInteraction) REFERENCES Interaction(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE CONSTRAINT TRIGGER trg_check_interaction_email
+CREATE CONSTRAINT TRIGGER trg_check_interaction_exists_email
 AFTER INSERT ON Interaction_Email
 DEFERRABLE INITIALLY DEFERRED
 FOR EACH ROW
-EXECUTE FUNCTION check_interaction();
+EXECUTE FUNCTION check_interaction_exists();
 
 CREATE TABLE Interaction_Appel (
     idInteraction INTEGER,
@@ -124,11 +180,11 @@ CREATE TABLE Interaction_Appel (
     CONSTRAINT FK_Interaction FOREIGN KEY (idInteraction) REFERENCES Interaction(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE CONSTRAINT TRIGGER trg_check_interaction_appel
+CREATE CONSTRAINT TRIGGER trg_check_interaction_exists_appel
 AFTER INSERT ON Interaction_Appel
 DEFERRABLE INITIALLY DEFERRED
 FOR EACH ROW
-EXECUTE FUNCTION check_interaction();
+EXECUTE FUNCTION check_interaction_exists();
 
 CREATE TYPE TypeEntretien AS ENUM ('Technique', 'RH', 'Autre');
 
@@ -140,11 +196,11 @@ CREATE TABLE Interaction_Entretien (
     CONSTRAINT FK_Interaction FOREIGN KEY (idInteraction) REFERENCES Interaction(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE CONSTRAINT TRIGGER trg_check_interaction_entretien 
+CREATE CONSTRAINT TRIGGER trg_check_interaction_exists_entretien 
 AFTER INSERT ON Interaction_Entretien
 DEFERRABLE INITIALLY DEFERRED
 FOR EACH ROW
-EXECUTE FUNCTION check_interaction(); 
+EXECUTE FUNCTION check_interaction_exists(); 
 
 CREATE TABLE Recruteur_Interaction (
     idRecruteur INTEGER NOT NULL,
@@ -333,7 +389,6 @@ CREATE TABLE Candidat_Domaine (
 );
 
 
-
 -- Adresse 
 -- 1
 INSERT INTO Adresse (latitude, longitude, rue, ville, npa, pays) 
@@ -373,14 +428,20 @@ COMMIT;
 
 -- Candidats
 -- 1
+BEGIN;
 INSERT INTO Personne (nom, prenom, email) VALUES ('Dupont', 'Jacques', 'jacques.dupont@gmail.com');
 INSERT INTO Candidat (idPersonne, age, genre, numeroTel, anneesExp, idAdresse) VALUES ((SELECT MAX(id) FROM Personne), 30, 'Homme', '0791234567', 7, 1);
+COMMIT;
 -- 2
+BEGIN;
 INSERT INTO Personne (nom, prenom, email) VALUES ('Martin', 'Sophie', 'sophie.martin@gmail.com');
 INSERT INTO Candidat (idPersonne, age, genre, numeroTel, anneesExp, idAdresse) VALUES ((SELECT MAX(id) FROM Personne), 28, 'Femme', '0791230123', 4, 2);
+COMMIT;
 -- 3
+BEGIN;
 INSERT INTO Personne (nom, prenom, email) VALUES ('Lemoine', 'Paul', 'paul.lemoine@yahoo.fr');
 INSERT INTO Candidat (idPersonne, age, genre, numeroTel, anneesExp, idAdresse) VALUES ((SELECT MAX(id) FROM Personne), 35, 'Homme', '0799876543', 10, 3);
+COMMIT;
 
 -- Candidat_Domaine
 INSERT INTO Candidat_Domaine (idCandidat, idDomaine, diplomePossede) VALUES (1, 1, 'Master');
@@ -394,11 +455,15 @@ INSERT INTO Candidat_Offre (idCandidat, idOffre, datePostulation, statut) VALUES
 
 -- Recruteurs
 -- 4
+BEGIN;
 INSERT INTO Personne (nom, prenom, email) VALUES ('Durand', 'Claire', 'claire.durand@outlook.com');
 INSERT INTO Recruteur (idPersonne) VALUES ((SELECT MAX(id) FROM Personne));
+COMMIT;
 -- 5
+BEGIN;
 INSERT INTO Personne (nom, prenom, email) VALUES ('Bernard', 'Lucas', 'lucas.bernard@hotmail.com');
 INSERT INTO Recruteur (idPersonne) VALUES ((SELECT MAX(id) FROM Personne));
+COMMIT;
 
 -- Recruteur_Candidat
 INSERT INTO Recruteur_Candidat (idRecruteur, idCandidat) VALUES (4,1);
@@ -408,18 +473,24 @@ INSERT INTO Recruteur_Candidat (idRecruteur, idCandidat) VALUES (5,3);
 
 -- Interaction_Email
 -- 1
+BEGIN;
 INSERT INTO Interaction (dateInteraction, notesTexte) VALUES ('2024-04-01', 'Entretien la semaine prochaine.');
 INSERT INTO Interaction_Email (idInteraction, objet) VALUES ((SELECT MAX(id) FROM Interaction), 'Confirmation rendez-vous.');
+COMMIT;
 
 -- Interaction_Appel
 -- 2 
+BEGIN;
 INSERT INTO Interaction (dateInteraction, notesTexte) VALUES ('2024-07-10', 'Demande de détails sur le poste.');
 INSERT INTO Interaction_Appel (idInteraction, duree) VALUES ((SELECT MAX(id) FROM Interaction), '00:15:00');
+COMMIT;
 
 -- Interaction_Entretien
 -- 3
+BEGIN;
 INSERT INTO Interaction (dateInteraction, notesTexte) VALUES ('2024-04-08', 'Entretien réussi, recontacter pour la phase suivante.');
 INSERT INTO Interaction_Entretien (idInteraction, typeEntretien, duree) VALUES ((SELECT MAX(id) FROM Interaction), 'Technique', '00:45:00');
+COMMIT;
 
 -- Recruteur_Interaction
 INSERT INTO Recruteur_Interaction (idRecruteur, idInteraction) VALUES (4,1);
