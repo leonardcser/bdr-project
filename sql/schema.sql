@@ -280,8 +280,7 @@ CREATE TABLE Domaine (
     nom VARCHAR(255) NOT NULL,
     CONSTRAINT PK_Domaine PRIMARY KEY(id)
 );
--- TODO : REMOVE AND ADAPT CI ON EA MODEL
-/*
+
 CREATE OR REPLACE FUNCTION check_domaine_link()
 RETURNS TRIGGER 
 LANGUAGE plpgsql
@@ -306,11 +305,12 @@ BEGIN
 END;
 $$;
 
-CREATE TRIGGER trg_check_domaine_link
+CREATE CONSTRAINT TRIGGER trg_check_domaine_link
 AFTER INSERT OR UPDATE ON Domaine
+DEFERRABLE INITIALLY DEFERRED
 FOR EACH ROW
 EXECUTE FUNCTION check_domaine_link();
-*/
+
 -- May need to add values possible for this enum
 CREATE TYPE Diplome AS ENUM ('Aucun', 'Maturité Gymnasiale', 'CFC', 'Bachelor', 'Master', 'Doctorat');
 
@@ -351,6 +351,7 @@ VALUES (46.5197, 6.6323, 'Avenue d’Ouchy 15', 'Lausanne', '1006', 'Suisse');
 INSERT INTO Adresse (latitude, longitude, rue, ville, npa, pays) 
 VALUES (46.8025, 7.1517, 'Rue de Morat 10', 'Fribourg', '1700', 'Suisse');
 
+BEGIN;
 -- Domaine
 -- 1
 INSERT INTO Domaine (nom) VALUES ('Developpement informatique');
@@ -368,6 +369,7 @@ VALUES (5, 'Développeur Full Stack avec expérience en technologies modernes.',
 -- Offre_Domaine
 INSERT INTO Offre_Domaine (idOffre, idDomaine, diplomeRecherche) VALUES (1, 2, 'Bachelor');
 INSERT INTO Offre_Domaine (idOffre, idDomaine, diplomeRecherche) VALUES (2, 1, 'Master');
+COMMIT;
 
 -- Candidats
 -- 1
