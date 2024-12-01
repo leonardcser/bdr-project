@@ -77,7 +77,7 @@ Recruteur.idPersonne reference Personne.id
 
 Adresse(\underline{id}, latitude, longitude, rue, ville, npa, pays)
 
-Candidat(\underline{idPersonne}, age, genre, numeroTel, annéesExp, idAdresse)  
+Candidat(\underline{idPersonne}, age, genre, numeroTel, anneesExp, idAdresse)  
 Candidat.idPersonne reference Personne.id  
 Candidat.idAdresse reference Adresse.id
 Candidat.idAdresse NOT NULL UNIQUE
@@ -86,7 +86,7 @@ Recruteur_Candidat(\underline{idRecruteur, idCandidat})
 Recruteur_Candidat.idRecruteur reference Recruteur.idPersonne  
 Recruteur_Candidat.idCandidat reference Candidat.idPersonne
 
-Interaction(\underline{id}, date, notes_texte)
+Interaction(\underline{id}, date, notesTexte)
 
 Recruteur_Interaction(\underline{idRecruteur, idInteraction})  
 Recruteur_Interaction.idRecruteur reference Recruteur.idPersonne  
@@ -99,19 +99,19 @@ Candidat_Interaction.idInteraction reference Interaction.id
 Email(\underline{idInteraction}, objet)  
 Email.idInteraction reference Interaction.id
 
-Appel(\underline{idInteraction}, durée)  
+Appel(\underline{idInteraction}, duree)  
 Appel.idInteraction reference Interaction.id
 
-Entretien(\underline{idInteraction}, type, durée)  
+Entretien(\underline{idInteraction}, typeEntretien, duree)  
 Entretien.idInteraction reference Interaction.id
 
-Offre(\underline{id}, descriptionOffre, nomPoste, annnéesExpRequises, datePublication, dateCloture, idAdresse)  
+Offre(\underline{id}, descriptionOffre, nomPoste, annneesExpRequises, datePublication, dateCloture, idAdresse)  
 Offre.idAdresse reference Adresse.id  
 Offre.idAdresse NOT NULL UNIQUE
 
-ContratTravail(\underline{id}, début, fin, salaireHoraire, idOffre)  
-ContratTravail.idOffre reference Offre.id  
-ContratTravail.idOffre NOT NULL, UNIQUE
+Contrat_Travail(\underline{id}, debut, fin, salaireHoraire, idOffre)  
+Contrat_Travail.idOffre reference Offre.id  
+Contrat_Travail.idOffre NOT NULL, UNIQUE
 
 Candidat_Offre(\underline{idCandidat, idOffre}, datePostulation, statut)  
 Candidat_Offre.idCandidat reference Candidat.idPersonne  
