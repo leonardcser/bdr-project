@@ -102,8 +102,8 @@ FOR EACH ROW
 EXECUTE FUNCTION check_personne_exists();
 
 CREATE TABLE Recruteur_Candidat (
-    idRecruteur INTEGER NOT NULL,
-    idCandidat INTEGER NOT NULL,
+    idRecruteur INTEGER,
+    idCandidat INTEGER,
     CONSTRAINT PK_Recruteur_Candidat PRIMARY KEY(idRecruteur, idCandidat),
     CONSTRAINT FK_Recruteur FOREIGN KEY (idRecruteur) REFERENCES Recruteur(idPersonne) ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT FK_Candidat FOREIGN KEY (idCandidat) REFERENCES Candidat(idPersonne) ON DELETE RESTRICT ON UPDATE CASCADE
@@ -203,16 +203,16 @@ FOR EACH ROW
 EXECUTE FUNCTION check_interaction_exists(); 
 
 CREATE TABLE Recruteur_Interaction (
-    idRecruteur INTEGER NOT NULL,
-    idInteraction INTEGER NOT NULL,
+    idRecruteur INTEGER,
+    idInteraction INTEGER,
     CONSTRAINT PK_Recruteur_Interaction PRIMARY KEY(idRecruteur, idInteraction),
     CONSTRAINT FK_Recruteur FOREIGN KEY (idRecruteur) REFERENCES Recruteur(idPersonne) ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT FK_Interaction FOREIGN KEY (idInteraction) REFERENCES Interaction(id) ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 CREATE TABLE Candidat_Interaction (
-    idCandidat INTEGER NOT NULL,
-    idInteraction INTEGER NOT NULL,
+    idCandidat INTEGER,
+    idInteraction INTEGER,
     CONSTRAINT PK_Candidat_Interaction PRIMARY KEY(idCandidat, idInteraction),
     CONSTRAINT FK_Candidat FOREIGN KEY (idCandidat) REFERENCES Candidat(idPersonne) ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT FK_Interaction FOREIGN KEY (idInteraction) REFERENCES Interaction(id) ON DELETE RESTRICT ON UPDATE CASCADE
@@ -290,8 +290,8 @@ EXECUTE FUNCTION check_fin_after_cloture();
 CREATE TYPE Statut AS ENUM ('En attente', 'En cours', 'Embauché', 'Refusé');
 
 CREATE TABLE Candidat_Offre (
-    idCandidat INTEGER NOT NULL,
-    idOffre INTEGER NOT NULL,
+    idCandidat INTEGER,
+    idOffre INTEGER,
     datePostulation date NOT NULL,
     statut Statut NOT NULL,
     CONSTRAINT PK_Candidat_Offre PRIMARY KEY(idCandidat, idOffre),
@@ -371,8 +371,8 @@ EXECUTE FUNCTION check_domaine_link();
 CREATE TYPE Diplome AS ENUM ('Aucun', 'Maturité Gymnasiale', 'CFC', 'Bachelor', 'Master', 'Doctorat');
 
 CREATE TABLE Offre_Domaine (
-    idOffre INTEGER NOT NULL,
-    idDomaine INTEGER NOT NULL,
+    idOffre INTEGER,
+    idDomaine INTEGER,
     diplomeRecherche Diplome NOT NULL,
     CONSTRAINT PK_Offre_Domaine PRIMARY KEY(idOffre, idDomaine),
     CONSTRAINT FK_Offre FOREIGN KEY (idOffre) REFERENCES Offre(id) ON DELETE RESTRICT ON UPDATE NO ACTION,
@@ -380,8 +380,8 @@ CREATE TABLE Offre_Domaine (
 );
 
 CREATE TABLE Candidat_Domaine (
-    idCandidat INTEGER NOT NULL,
-    idDomaine INTEGER NOT NULL,
+    idCandidat INTEGER,
+    idDomaine INTEGER,
     diplomePossede Diplome NOT NULL,
     CONSTRAINT PK_Candidat_Domaine PRIMARY KEY(idCandidat, idDomaine),
     CONSTRAINT FK_Candidat FOREIGN KEY (idCandidat) REFERENCES Candidat(idPersonne) ON DELETE RESTRICT ON UPDATE CASCADE,
