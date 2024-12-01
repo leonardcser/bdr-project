@@ -53,7 +53,7 @@ CREATE TABLE Candidat (
     idAdresse INTEGER NOT NULL UNIQUE,
     CONSTRAINT PK_Candidat PRIMARY KEY(idPersonne),
     CONSTRAINT FK_Personne FOREIGN KEY (idPersonne) REFERENCES Personne(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT FK_Adresse FOREIGN KEY (idAdresse) REFERENCES Adresse(id) ON DELETE RESTRICT ON UPDATE NO_ACTION,
+    CONSTRAINT FK_Adresse FOREIGN KEY (idAdresse) REFERENCES Adresse(id) ON DELETE RESTRICT ON UPDATE NO ACTION,
     CHECK (age >= 16 AND age < 100)
 );
 
@@ -171,7 +171,7 @@ CREATE TABLE Offre (
     datePublication date NOT NULL,
     dateCloture date,
     CONSTRAINT PK_Offre PRIMARY KEY(id),
-    CONSTRAINT FK_Adresse FOREIGN KEY (idAdresse) REFERENCES Adresse(id) ON DELETE RESTRICT ON UPDATE NO_ACTION,
+    CONSTRAINT FK_Adresse FOREIGN KEY (idAdresse) REFERENCES Adresse(id) ON DELETE RESTRICT ON UPDATE NO ACTION,
     CHECK (dateCloture IS NULL OR dateCloture > datePublication)
 );
 
@@ -183,7 +183,7 @@ CREATE TABLE Contrat_Travail (
     salaireHoraire FLOAT NOT NULL,
     idOffre INTEGER NOT NULL UNIQUE,
     CONSTRAINT PK_Contrat_Travail PRIMARY KEY(id),
-    CONSTRAINT FK_Contrat_Travail FOREIGN KEY (idOffre) REFERENCES Offre(id) ON DELETE RESTRICT ON UPDATE NO_ACTION,
+    CONSTRAINT FK_Contrat_Travail FOREIGN KEY (idOffre) REFERENCES Offre(id) ON DELETE RESTRICT ON UPDATE NO ACTION,
     CHECK (fin IS NULL OR fin > debut),
     CHECK (salaireHoraire > 0)
 );
@@ -240,7 +240,7 @@ CREATE TABLE Candidat_Offre (
     statut Statut NOT NULL,
     CONSTRAINT PK_Candidat_Offre PRIMARY KEY(idCandidat, idOffre),
     CONSTRAINT FK_Candidat FOREIGN KEY (idCandidat) REFERENCES Candidat(idPersonne) ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT FK_Offre FOREIGN KEY (idOffre) REFERENCES Offre(id) ON DELETE RESTRICT ON UPDATE NO_ACTION
+    CONSTRAINT FK_Offre FOREIGN KEY (idOffre) REFERENCES Offre(id) ON DELETE RESTRICT ON UPDATE NO ACTION
 );
 
 CREATE OR REPLACE FUNCTION check_candidat_offre_constraints()
@@ -280,7 +280,8 @@ CREATE TABLE Domaine (
     nom VARCHAR(255) NOT NULL,
     CONSTRAINT PK_Domaine PRIMARY KEY(id)
 );
-
+-- TODO : REMOVE AND ADAPT CI ON EA MODEL
+/*
 CREATE OR REPLACE FUNCTION check_domaine_link()
 RETURNS TRIGGER 
 LANGUAGE plpgsql
@@ -309,7 +310,7 @@ CREATE TRIGGER trg_check_domaine_link
 AFTER INSERT OR UPDATE ON Domaine
 FOR EACH ROW
 EXECUTE FUNCTION check_domaine_link();
-
+*/
 -- May need to add values possible for this enum
 CREATE TYPE Diplome AS ENUM ('Aucun', 'Maturité Gymnasiale', 'CFC', 'Bachelor', 'Master', 'Doctorat');
 
@@ -318,8 +319,8 @@ CREATE TABLE Offre_Domaine (
     idDomaine INTEGER NOT NULL,
     diplomeRecherche Diplome NOT NULL,
     CONSTRAINT PK_Offre_Domaine PRIMARY KEY(idOffre, idDomaine),
-    CONSTRAINT FK_Offre FOREIGN KEY (idOffre) REFERENCES Offre(id) ON DELETE RESTRICT ON UPDATE NO_ACTION,
-    CONSTRAINT FK_Domaine FOREIGN KEY (idDomaine) REFERENCES Domaine(id) ON DELETE RESTRICT ON UPDATE NO_ACTION
+    CONSTRAINT FK_Offre FOREIGN KEY (idOffre) REFERENCES Offre(id) ON DELETE RESTRICT ON UPDATE NO ACTION,
+    CONSTRAINT FK_Domaine FOREIGN KEY (idDomaine) REFERENCES Domaine(id) ON DELETE RESTRICT ON UPDATE NO ACTION
 );
 
 CREATE TABLE Candidat_Domaine (
@@ -328,7 +329,7 @@ CREATE TABLE Candidat_Domaine (
     diplomePossede Diplome NOT NULL,
     CONSTRAINT PK_Candidat_Domaine PRIMARY KEY(idCandidat, idDomaine),
     CONSTRAINT FK_Candidat FOREIGN KEY (idCandidat) REFERENCES Candidat(idPersonne) ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT FK_Domaine FOREIGN KEY (idDomaine) REFERENCES Domaine(id) ON DELETE RESTRICT ON UPDATE NO_ACTION
+    CONSTRAINT FK_Domaine FOREIGN KEY (idDomaine) REFERENCES Domaine(id) ON DELETE RESTRICT ON UPDATE NO ACTION
 );
 
 
@@ -371,13 +372,13 @@ INSERT INTO Offre_Domaine (idOffre, idDomaine, diplomeRecherche) VALUES (2, 1, '
 -- Candidats
 -- 1
 INSERT INTO Personne (nom, prenom, email) VALUES ('Dupont', 'Jacques', 'jacques.dupont@gmail.com');
-INSERT INTO Candidat (idPersonne, age, genre, numeroTel, annéesExp, idAdresse) VALUES ((SELECT MAX(id) FROM Personne), 30, 'Hommme', '0791234567', 7, 1);
+INSERT INTO Candidat (idPersonne, age, genre, numeroTel, anneesExp, idAdresse) VALUES ((SELECT MAX(id) FROM Personne), 30, 'Homme', '0791234567', 7, 1);
 -- 2
 INSERT INTO Personne (nom, prenom, email) VALUES ('Martin', 'Sophie', 'sophie.martin@gmail.com');
-INSERT INTO Candidat (idPersonne, age, genre, numeroTel, annéesExp, idAdresse) VALUES ((SELECT MAX(id) FROM Personne), 28, 'Femme', '0791230123', 4, 2);
+INSERT INTO Candidat (idPersonne, age, genre, numeroTel, anneesExp, idAdresse) VALUES ((SELECT MAX(id) FROM Personne), 28, 'Femme', '0791230123', 4, 2);
 -- 3
 INSERT INTO Personne (nom, prenom, email) VALUES ('Lemoine', 'Paul', 'paul.lemoine@yahoo.fr');
-INSERT INTO Candidat (idPersonne, age, genre, numeroTel, annéesExp, idAdresse) VALUES ((SELECT MAX(id) FROM Personne), 35, 'Homme', '0799876543', 10, 3);
+INSERT INTO Candidat (idPersonne, age, genre, numeroTel, anneesExp, idAdresse) VALUES ((SELECT MAX(id) FROM Personne), 35, 'Homme', '0799876543', 10, 3);
 
 -- Candidat_Domaine
 INSERT INTO Candidat_Domaine (idCandidat, idDomaine, diplomePossede) VALUES (1, 1, 'Master');
