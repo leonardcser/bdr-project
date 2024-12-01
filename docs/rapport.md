@@ -147,8 +147,8 @@ ON DELETE RESTRICT
 ON UPDATE NO ACTION
 ```
 
-- **Personne :** Si une personne est supprimée, le profil de candidat est également supprimé. Cela garantit qu'un candidat ne peut pas exister sans une identité personnelle de base.
-- **Adresse :** L'adresse ne peut pas être supprimée si un candidat y est associé, afin de préserver l'intégrité des données historiques.
+- **Personne:** Si une personne est supprimée, le profil de candidat est également supprimé. Cela garantit qu'un candidat ne peut pas exister sans une identité personnelle de base.
+- **Adresse:** L'adresse ne peut pas être supprimée si un candidat y est associé, afin de préserver l'intégrité des données historiques.
 
 #### Recruteur
 
@@ -159,7 +159,7 @@ ON DELETE CASCADE
 ON UPDATE CASCADE
 ```
 
-- Similaire au Candidat : si la personne est supprimée, son profil de recruteur est également supprimé.
+- Similaire au Candidat: si la personne est supprimée, son profil de recruteur est également supprimé.
 
 #### Recruteur_Candidat
 
@@ -273,7 +273,7 @@ ON UPDATE NO ACTION
 - Préserve l'intégrité des liens entre offres/candidats et domaines.
 - Empêche la suppression de domaines sans considérer leurs relations existantes.
 
-Ces choix de contraintes visent à :
+Ces choix de contraintes visent à:
 
 - Maintenir l'intégrité référentielle
 - Prévenir les suppressions accidentelles
@@ -284,49 +284,61 @@ Ces choix de contraintes visent à :
 
 #### `check_personne()`
 
-- **Objectif :** Garantir qu'un Candidat ou un Recruteur ne peut être créé que si l'identifiant de personne existe déjà
-- **Déclenchement :** Après l'insertion dans les tables Candidat et Recruteur
-- **Vérification :** Vérifie que l'`idPersonne` n'est pas null et existe dans la table Personne
-- **Action :** Lève une exception si la condition n'est pas respectée
+- **Objectif:** Garantir qu'une personne ne peut être créé que si un Candidat ou un Recruteur est aussi crée dans la transaction
+- **Déclenchement:** Après l'insertion dans la table Personne
+- **Action:** Lève une exception si la condition n'est pas respectée
+
+#### `check_personne_exists()`
+
+- **Objectif:** Garantir qu'un Candidat ou un Recruteur ne peut être créé que si l'identifiant de personne existe déjà
+- **Déclenchement:** Après l'insertion dans les tables Candidat et Recruteur
+- **Vérification:** Vérifie que l'`idPersonne` n'est pas null et existe dans la table Personne
+- **Action:** Lève une exception si la condition n'est pas respectée
 
 #### `check_interaction()`
 
-- **Objectif :** Assurer que les interactions spécialisées (Email, Appel, Entretien) sont liées à une interaction principale existante
-- **Déclenchement :** Après l'insertion dans les tables Interaction_Email, Interaction_Appel, Interaction_Entretien
-- **Vérification :** Confirme que l'`idInteraction` n'est pas null et existe dans la table Interaction
-- **Action :** Lève une exception si la condition n'est pas respectée
+- **Objectif:** Garantir qu'une interaction ne peut être créé que si une interactions spécialisées (Email, Appel, Entretien) est aussi crée dans la transaction
+- **Déclenchement:** Après l'insertion dans la table Interaction
+- **Action:** Lève une exception si la condition n'est pas respectée
+
+#### `check_interaction_exists()`
+
+- **Objectif:** Assurer que les interactions spécialisées (Email, Appel, Entretien) sont liées à une interaction principale existante
+- **Déclenchement:** Après l'insertion dans les tables Interaction_Email, Interaction_Appel, Interaction_Entretien
+- **Vérification:** Confirme que l'`idInteraction` n'est pas null et existe dans la table Interaction
+- **Action:** Lève une exception si la condition n'est pas respectée
 
 #### `check_contrat_embauche()`
 
-- **Objectif :** Empêcher la création d'un contrat de travail sans candidat embauché
-- **Déclenchement :** Avant l'insertion dans la table Contrat_Travail
-- **Vérification :** Vérifie qu'il existe au moins un candidat avec le statut 'Embauché' pour l'offre
-- **Action :** Lève une exception si aucun candidat n'a été embauché
+- **Objectif:** Empêcher la création d'un contrat de travail sans candidat embauché
+- **Déclenchement:** Avant l'insertion dans la table Contrat_Travail
+- **Vérification:** Vérifie qu'il existe au moins un candidat avec le statut 'Embauché' pour l'offre
+- **Action:** Lève une exception si aucun candidat n'a été embauché
 
 #### `check_fin_after_cloture()`
 
-- **Objectif :** Garantir que la date de fin du contrat est postérieure à la date de clôture de l'offre
-- **Déclenchement :** Avant l'insertion ou la mise à jour dans la table Contrat_Travail
-- **Vérification :** Compare la date de fin du contrat avec la date de clôture de l'offre
-- **Action :** Lève une exception si la date de fin est antérieure ou égale à la date de clôture
+- **Objectif:** Garantir que la date de fin du contrat est postérieure à la date de clôture de l'offre
+- **Déclenchement:** Avant l'insertion ou la mise à jour dans la table Contrat_Travail
+- **Vérification:** Compare la date de fin du contrat avec la date de clôture de l'offre
+- **Action:** Lève une exception si la date de fin est antérieure ou égale à la date de clôture
 
 #### `check_candidat_offre_constraints()`
 
-- **Objectif :** Valider les candidatures selon plusieurs contraintes
+- **Objectif:** Valider les candidatures selon plusieurs contraintes
   1. Un statut 'Embauché' nécessite une date de clôture d'offre
   2. La date de postulation doit être entre la date de publication et la date de clôture de l'offre
-- **Déclenchement :** Avant l'insertion ou la mise à jour dans la table Candidat_Offre
-- **Vérification :**
+- **Déclenchement:** Avant l'insertion ou la mise à jour dans la table Candidat_Offre
+- **Vérification:**
   - Vérifie la cohérence du statut 'Embauché' avec la date de clôture
   - Contrôle que la date de postulation est dans la période valide de l'offre
-- **Action :** Lève une exception si l'une des conditions n'est pas respectée
+- **Action:** Lève une exception si l'une des conditions n'est pas respectée
 
 #### `check_domaine_link()`
 
-- **Objectif :** S'assurer qu'un domaine est lié soit à un candidat, soit à une offre
-- **Déclenchement :** Après l'insertion ou la mise à jour dans la table Domaine
-- **Vérification :** Compte les liens avec des candidats et des offres
-- **Action :** Lève une exception si aucun lien n'est trouvé
+- **Objectif:** S'assurer qu'un domaine est lié soit à un candidat, soit à une offre
+- **Déclenchement:** Après l'insertion ou la mise à jour dans la table Domaine
+- **Vérification:** Compte les liens avec des candidats et des offres
+- **Action:** Lève une exception si aucun lien n'est trouvé
 
 Tous ces triggers visent à maintenir la cohérence et l'intégrité des données du système de gestion de candidatures.
 
@@ -338,9 +350,9 @@ Tous ces triggers visent à maintenir la cohérence et l'intégrité des donnée
 CHECK (age >= 16 AND age < 100)
 ```
 
-- **Objectif :** Garantir un intervalle d'âge réaliste pour les candidats
-- **Plage :** Entre 16 et 99 ans
-- **Logique :** Exclut les candidats potentiellement trop jeunes ou irréalistement âgés
+- **Objectif:** Garantir un intervalle d'âge réaliste pour les candidats
+- **Plage:** Entre 16 et 99 ans
+- **Logique:** Exclut les candidats potentiellement trop jeunes ou irréalistement âgés
 
 #### Validation des Coordonnées Géographiques (Adresse)
 
@@ -349,10 +361,10 @@ CHECK (latitude > -90 AND latitude < 90)
 CHECK (longitude > -180 AND longitude < 180)
 ```
 
-- **Objectif :** Assurer des coordonnées géographiques valides
-- **Latitude :** Comprise entre -90° et 90° (pôles Nord et Sud)
-- **Longitude :** Comprise entre -180° et 180° (méridien de Greenwich)
-- **Logique :** Correspond aux limites physiques de la Terre
+- **Objectif:** Assurer des coordonnées géographiques valides
+- **Latitude:** Comprise entre -90° et 90° (pôles Nord et Sud)
+- **Longitude:** Comprise entre -180° et 180° (méridien de Greenwich)
+- **Logique:** Correspond aux limites physiques de la Terre
 
 #### Validation des Dates de Contrat de Travail
 
@@ -360,9 +372,9 @@ CHECK (longitude > -180 AND longitude < 180)
 CHECK (fin IS NULL OR fin > debut)
 ```
 
-- **Objectif :** Garantir la cohérence des dates de contrat
-- **Condition :** Si une date de fin est spécifiée, elle doit être postérieure à la date de début
-- **Flexibilité :** Permet des contrats sans date de fin (contrats indéterminés)
+- **Objectif:** Garantir la cohérence des dates de contrat
+- **Condition:** Si une date de fin est spécifiée, elle doit être postérieure à la date de début
+- **Flexibilité:** Permet des contrats sans date de fin (contrats indéterminés)
 
 #### Validation du Salaire Horaire
 
@@ -370,9 +382,9 @@ CHECK (fin IS NULL OR fin > debut)
 CHECK (salaireHoraire > 0)
 ```
 
-- **Objectif :** Assurer un salaire horaire positif
-- **Condition :** Le salaire doit être strictement supérieur à zéro
-- **Logique :** Exclut les valeurs nulles ou négatives
+- **Objectif:** Assurer un salaire horaire positif
+- **Condition:** Le salaire doit être strictement supérieur à zéro
+- **Logique:** Exclut les valeurs nulles ou négatives
 
 #### Validation des Dates de Publication et Clôture d'Offre
 
@@ -380,9 +392,9 @@ CHECK (salaireHoraire > 0)
 CHECK (dateCloture IS NULL OR dateCloture > datePublication)
 ```
 
-- **Objectif :** Garantir la logique temporelle des offres
-- **Condition :** Si une date de clôture existe, elle doit être postérieure à la date de publication
-- **Flexibilité :** Autorise des offres sans date de clôture
+- **Objectif:** Garantir la logique temporelle des offres
+- **Condition:** Si une date de clôture existe, elle doit être postérieure à la date de publication
+- **Flexibilité:** Autorise des offres sans date de clôture
 
 # Implémentation
 
