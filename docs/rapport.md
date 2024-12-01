@@ -21,8 +21,8 @@ numbersections: true
 
 Dans le cadre du projet de BDR, nous avons:
 
-1. Créer le cahier des charges
-2. Éffectué la modéliser
+1. Créé le cahier des charges
+2. Éffectué la modélisation
 3. Implémenté physiquement la bdd
 4. Codé une application
 
