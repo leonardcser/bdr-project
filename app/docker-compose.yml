@@ -1,8 +1,3 @@
-version: "3.8"
-networks:
-  bdr-net:
-    driver: bridge
-
 services:
   postgresql:
     image: "bitnami/postgresql:16"
@@ -17,3 +12,23 @@ services:
       - .:/data:ro
     networks:
       - bdr-net
+
+  flask-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - FLASK_ENV=development
+      - PAGILA_DB=postgresql://bdr:bdr@postgresql:5432/bdr
+    volumes:
+      - .:/app:ro
+    ports:
+      - 8080:8080
+    networks:
+      - bdr-net
+    depends_on:
+      - postgresql
+
+networks:
+  bdr-net:
+    driver: bridge

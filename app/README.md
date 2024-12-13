@@ -2,7 +2,6 @@ Based on the [flask tutorial example](https://github.com/pallets/flask/tree/main
 
 ```sh
 export PAGILA_DB="postgresql://bdr:bdr@localhost:5432/bdr"
-flask --app pagila-ui init-db
-flask --app pagila-ui run --debug
+flask --app src init-db
+flask --app src run --debug
 ```
-
