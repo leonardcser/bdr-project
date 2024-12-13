@@ -12,6 +12,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Expose the Flask port
-EXPOSE 5000
+EXPOSE 8080
 
 ENTRYPOINT ["sh", "-c", "flask --app src init-db && flask --app src run --host=0.0.0.0 -p 8080 --debug"]
