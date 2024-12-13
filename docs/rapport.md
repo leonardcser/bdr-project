@@ -252,7 +252,7 @@ ON UPDATE NO ACTION
 ```
 
 - Empêche la suppression d'un candidat ayant postulé à des offres.
-- Interdit la modification de l'offre une fois les candidatures enregistrées.
+- Interdit la modification de la clé de l'offre une fois les candidatures enregistrées.
 
 #### Offre_Domaine et Candidat_Domaine
 

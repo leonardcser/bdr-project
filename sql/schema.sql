@@ -41,20 +41,6 @@ DEFERRABLE INITIALLY DEFERRED
 FOR EACH ROW 
 EXECUTE FUNCTION check_personne();
 
-CREATE OR REPLACE FUNCTION check_personne_exists() 
-RETURNS TRIGGER 
-LANGUAGE plpgsql 
-AS $$
-BEGIN
-    IF NEW.idPersonne IS NULL OR NOT EXISTS (
-        SELECT 1 FROM Personne WHERE id = NEW.idPersonne
-    ) THEN
-        RAISE EXCEPTION 'Missing person ID: %', NEW.idPersonne;
-    END IF;
-    RETURN NEW;
-END;
-$$;
-
 CREATE TABLE Adresse (
     id serial,
     latitude FLOAT NOT NULL,
@@ -83,23 +69,11 @@ CREATE TABLE Candidat (
     CHECK (age >= 16 AND age < 100)
 );
 
-CREATE CONSTRAINT TRIGGER trg_check_personne_exists_candidat
-AFTER INSERT ON Candidat
-DEFERRABLE INITIALLY DEFERRED
-FOR EACH ROW
-EXECUTE FUNCTION check_personne_exists();
-
 CREATE TABLE Recruteur (
     idPersonne INTEGER,
     CONSTRAINT PK_Recruteur PRIMARY KEY(idPersonne),
     CONSTRAINT FK_Personne FOREIGN KEY (idPersonne) REFERENCES Personne(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
-
-CREATE CONSTRAINT TRIGGER trg_check_personne_exists_recruteur
-AFTER INSERT ON Recruteur
-DEFERRABLE INITIALLY DEFERRED
-FOR EACH ROW
-EXECUTE FUNCTION check_personne_exists();
 
 CREATE TABLE Recruteur_Candidat (
     idRecruteur INTEGER,
@@ -146,20 +120,6 @@ DEFERRABLE INITIALLY DEFERRED
 FOR EACH ROW
 EXECUTE FUNCTION check_interaction();
 
-CREATE OR REPLACE FUNCTION check_interaction_exists() 
-RETURNS TRIGGER 
-LANGUAGE plpgsql 
-AS $$
-BEGIN
-    IF NEW.idInteraction IS NULL OR NOT EXISTS (
-        SELECT 1 FROM Interaction WHERE id = NEW.idInteraction
-    ) THEN
-        RAISE EXCEPTION 'Missing interaction ID: %', NEW.idInteraction;
-    END IF;
-    RETURN NEW;
-END;
-$$;
-
 CREATE TABLE Interaction_Email (
     idInteraction INTEGER,
     objet VARCHAR(255) NOT NULL,
@@ -167,24 +127,12 @@ CREATE TABLE Interaction_Email (
     CONSTRAINT FK_Interaction FOREIGN KEY (idInteraction) REFERENCES Interaction(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE CONSTRAINT TRIGGER trg_check_interaction_exists_email
-AFTER INSERT ON Interaction_Email
-DEFERRABLE INITIALLY DEFERRED
-FOR EACH ROW
-EXECUTE FUNCTION check_interaction_exists();
-
 CREATE TABLE Interaction_Appel (
     idInteraction INTEGER,
     duree TIME NOT NULL,
     CONSTRAINT PK_Interaction_Appel PRIMARY KEY(idInteraction),
     CONSTRAINT FK_Interaction FOREIGN KEY (idInteraction) REFERENCES Interaction(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
-
-CREATE CONSTRAINT TRIGGER trg_check_interaction_exists_appel
-AFTER INSERT ON Interaction_Appel
-DEFERRABLE INITIALLY DEFERRED
-FOR EACH ROW
-EXECUTE FUNCTION check_interaction_exists();
 
 CREATE TYPE TypeEntretien AS ENUM ('Technique', 'RH', 'Autre');
 
@@ -195,12 +143,6 @@ CREATE TABLE Interaction_Entretien (
     CONSTRAINT PK_Interaction_Entretien PRIMARY KEY(idInteraction),
     CONSTRAINT FK_Interaction FOREIGN KEY (idInteraction) REFERENCES Interaction(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
-
-CREATE CONSTRAINT TRIGGER trg_check_interaction_exists_entretien 
-AFTER INSERT ON Interaction_Entretien
-DEFERRABLE INITIALLY DEFERRED
-FOR EACH ROW
-EXECUTE FUNCTION check_interaction_exists(); 
 
 CREATE TABLE Recruteur_Interaction (
     idRecruteur INTEGER,
@@ -236,7 +178,7 @@ CREATE TABLE Contrat_Travail (
     id serial,
     debut date NOT NULL,
     fin date,
-    salaireHoraire FLOAT NOT NULL,
+    salaireHoraire DECIMAL(10, 2) NOT NULL,
     idOffre INTEGER NOT NULL UNIQUE,
     CONSTRAINT PK_Contrat_Travail PRIMARY KEY(id),
     CONSTRAINT FK_Contrat_Travail FOREIGN KEY (idOffre) REFERENCES Offre(id) ON DELETE RESTRICT ON UPDATE NO ACTION,

@@ -1034,7 +1034,7 @@
 											"top": 335,
 											"width": 34.68359375,
 											"height": 13,
-											"text": "Email"
+											"text": "Interaction_Email"
 										},
 										{
 											"_type": "LabelView",
@@ -1327,7 +1327,7 @@
 											"top": 335,
 											"width": 36.11181640625,
 											"height": 13,
-											"text": "Appel"
+											"text": "Interaction_Appel"
 										},
 										{
 											"_type": "LabelView",
@@ -1638,7 +1638,7 @@
 											"top": 335,
 											"width": 56.341796875,
 											"height": 13,
-											"text": "Entretien"
+											"text": "Interaction_Entretien"
 										},
 										{
 											"_type": "LabelView",
@@ -7445,7 +7445,7 @@
 					"_parent": {
 						"$ref": "AAAAAAFF+qBWK6M3Z8Y="
 					},
-					"name": "Entretien",
+					"name": "Interaction_Entretien",
 					"ownedElements": [
 						{
 							"_type": "UMLAssociation",
@@ -7956,7 +7956,7 @@
 					"_parent": {
 						"$ref": "AAAAAAFF+qBWK6M3Z8Y="
 					},
-					"name": "Email",
+					"name": "Interaction_Email",
 					"ownedElements": [
 						{
 							"_type": "UMLGeneralization",
@@ -7990,7 +7990,7 @@
 					"_parent": {
 						"$ref": "AAAAAAFF+qBWK6M3Z8Y="
 					},
-					"name": "Appel",
+					"name": "Interaction_Appel",
 					"ownedElements": [
 						{
 							"_type": "UMLGeneralization",
