@@ -5,3 +5,7 @@ export PAGILA_DB="postgresql://bdr:bdr@localhost:5432/bdr"
 flask --app src init-db
 flask --app src run --debug
 ```
+
+# References
+
+https://simplecss.org
