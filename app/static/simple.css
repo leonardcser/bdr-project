@@ -75,20 +75,48 @@ body {
   font-size: 1.15rem;
   line-height: 1.5;
   display: grid;
-  grid-template-columns: 1fr min(45rem, 90%) 1fr;
+  grid-template-columns: 1fr 6fr; /* Sidebar and content widths */
+  grid-template-rows: auto;
   margin: 0;
+  height: 100vh;
 }
-body > * {
+body > main {
   grid-column: 2;
+  overflow-y: auto;
+  padding: 2rem;
 }
 
 /* Make the header bg full width, but the content inline with body */
 body > header {
+  grid-column: 1;
   background-color: var(--accent-bg);
-  border-bottom: 1px solid var(--border);
   text-align: center;
-  padding: 0 0.5rem 2rem 0.5rem;
-  grid-column: 1 / -1;
+  padding: 0.5rem;
+}
+
+body > header > nav {
+  margin-top: 0.5rem !important;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+body > header > nav > h2 {
+  margin: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.75rem;
+  text-align: left;
+  padding: 0.5rem 1.5rem;
+}
+
+body > header > nav > a {
+  font-weight: 600;
+  margin: 0;
+  padding: 0.25rem 1.5rem;
+  border: none;
+  text-align: left;
+  font-size: 1rem;
+  background-color: transparent;
 }
 
 body > header > *:only-child {

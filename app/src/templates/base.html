@@ -9,9 +9,19 @@
 </head>
 
 <body>
-  <h1>Recruta</h1>
-  {% block content %}
-  {% endblock %}
+  <header>
+    <nav>
+      <h2>Recruta</h2>
+      <a href="#">Accueil</a>
+      <a href="#">Suivi</a>
+      <a href="#">Historique</a>
+    </nav>
+  </header>
+  <main>
+    <h1>Nothing here yet...</h1>
+    {% block content %}
+    {% endblock %}
+  </main>
   <!-- Hot Reloading -->
   {% if DEVELOPMENT %}
   {{ hotreload.script(url_for('hot-reload')) | safe }}
