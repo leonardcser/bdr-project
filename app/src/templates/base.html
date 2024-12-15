@@ -1,15 +1,21 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Recruta</title>
-    <link href="static/simple.css" rel="stylesheet" />
-  </head>
-  <body>
-    <h1>Recruta</h1>
-    <!-- Hot Reloading -->
-    {% if DEVELOPMENT %} {{ hotreload.script(url_for('hot-reload')) | safe }} {%
-    endif %}
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recruta</title>
+  <link href="static/simple.css" rel="stylesheet" />
+</head>
+
+<body>
+  <h1>Recruta</h1>
+  {% block content %}
+  {% endblock %}
+  <!-- Hot Reloading -->
+  {% if DEVELOPMENT %}
+  {{ hotreload.script(url_for('hot-reload')) | safe }}
+  {% endif %}
+</body>
+
 </html>
