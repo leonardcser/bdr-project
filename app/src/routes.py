@@ -1,13 +1,28 @@
-import json
-from datetime import date, datetime
+from typing import Annotated
 
-from fastapi import APIRouter, Request
+from asyncpg import PostgresError
+from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse
 
 from config import templates
 from db import database
+from models import Candidat, CandidatCreate, Offre, OffreCreate
 
 router = APIRouter()
+
+
+def success(msg: str | None = None):
+    res = dict(status="success")
+    if msg:
+        res["msg"] = msg
+    return res
+
+
+def error(msg: str | None = None):
+    res = dict(status="error")
+    if msg:
+        res["msg"] = msg
+    return res
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -16,391 +31,219 @@ async def home(request: Request):
 
 
 @router.get("/candidats", tags=["candidats"])
-async def get_candidats(request: Request):
-    query = "SELECT * FROM candidat"
-    data = await database.fetch_all(query=query)
+async def get_candidats(request: Request) -> list[Candidat]:
+    try:
+        query = "SELECT * FROM View_Candidat;"
+        data = await database.fetch_all(query=query)
+        return [dict(record) for record in data]
 
-    data_dict = [dict(record) for record in data]
+    except PostgresError as e:
+        return error(str(e))
 
-    return templates.TemplateResponse(
-        request=request,
-        name="data.html",
-        context={"data": json.dumps(data_dict, indent=2)},
-    )
-    
+
 @router.post("/candidats", tags=["candidats"])
 async def post_candidats(
-    nom: str,
-    prenom: str,
-    email: str,
-    age: int,
-    genre: str,
-    numeroTel: str,
-    anneesExp: int,
-    latitude: float,
-    longitude: float,
-    rue: str,
-    ville: str,
-    npa: str,
-    pays: str
-
+    data: Annotated[CandidatCreate, Form()],
 ):
     try:
-        async with database.transaction():
-            insert_address_query = """
+        insert_full_query = """
+        WITH inserted_adresse AS (
             INSERT INTO Adresse (latitude, longitude, rue, ville, npa, pays)
             VALUES (:latitude, :longitude, :rue, :ville, :npa, :pays)
-            RETURNING id;
-            """
-            adresse_id = await database.execute(
-                query=insert_address_query,
-                values={
-                    "latitude": latitude,
-                    "longitude": longitude,
-                    "rue": rue,
-                    "ville": ville,
-                    "npa": npa,
-                    "pays": pays,
-                },
-            )
-
-            insert_person_query = """
+            RETURNING id AS idadresse
+        ),
+        inserted_personne AS (
             INSERT INTO Personne (nom, prenom, email)
             VALUES (:nom, :prenom, :email)
-            RETURNING id;
-            """
-            person_id = await database.execute(
-                query=insert_person_query,
-                values={"nom": nom, "prenom": prenom, "email": email},
-            )
+            RETURNING id AS idpersonne
+        )
+        INSERT INTO Candidat (
+            idpersonne, age, genre, numerotel, anneesexp,
+            idadresse
+        )
+        SELECT
+            inserted_personne.idpersonne,
+            :age,
+            :genre,
+            :numerotel,
+            :anneesexp,
+            inserted_adresse.idadresse
+        FROM inserted_adresse, inserted_personne;
+        """
 
-            insert_candidat_query = """
-            INSERT INTO Candidat (idPersonne, age, genre, numeroTel, anneesExp, idAdresse)
-            VALUES (:idPersonne, :age, :genre, :numeroTel, :anneesExp, :idAdresse)
-            """
-            await database.execute(
-                query=insert_candidat_query,
-                values={
-                    "idPersonne": person_id,
-                    "age": age,
-                    "genre": genre,
-                    "numeroTel": numeroTel,
-                    "anneesExp": anneesExp,
-                    "idAdresse": adresse_id,
-                },
-            )
+        await database.execute(
+            query=insert_full_query,
+            values=data.dict(),
+        )
 
-        return {"status": "success", "message": "Candidat ajouté avec succès"}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
+        return success("Sucessfully added new candidat")
+    except PostgresError as e:
+        return error(str(e))
 
 
 @router.put("/candidats/{id}", tags=["candidats"])
 async def put_candidats(
     id: int,
-    nom: str | None = None,
-    prenom: str | None = None,
-    email: str | None = None,
-    age: int | None = None,
-    genre: str | None = None,
-    numeroTel: str | None = None,
-    anneesExp: int | None = None,
-    latitude: float | None = None,
-    longitude: float | None = None,
-    rue: str | None = None,
-    ville: str | None = None,
-    npa: str | None = None,
-    pays: str | None = None,
+    data: Annotated[CandidatCreate, Form()],
 ):
     try:
-        async with database.transaction():
-            # Mise à jour de la table Personne
-            personne_updates = []
-            personne_values = {"id": id}
+        get_idadresse_query = """
+        SELECT idadresse
+        FROM Candidat
+        WHERE idpersonne = :id;
+        """
 
-            if nom:
-                personne_updates.append("nom = :nom")
-                personne_values["nom"] = nom
-            if prenom:
-                personne_updates.append("prenom = :prenom")
-                personne_values["prenom"] = prenom
-            if email:
-                personne_updates.append("email = :email")
-                personne_values["email"] = email
+        res = await database.fetch_one(query=get_idadresse_query, values=dict(id=id))
+        if not res:
+            return error("Candidat adresse not found")
 
-            if personne_updates:
-                update_personne_query = f"""
-                UPDATE Personne
-                SET {", ".join(personne_updates)}
-                WHERE id = :id
-                """
-                await database.execute(query=update_personne_query, values=personne_values)
+        idadresse = res["idadresse"]
 
-            # Mise à jour de la table Candidat
-            candidat_updates = []
-            candidat_values = {"id": id}
+        update_full_query = """
+        WITH updated_adresse AS (
+            UPDATE Adresse
+            SET latitude = :latitude,
+                longitude = :longitude,
+                rue = :rue,
+                ville = :ville,
+                npa = :npa,
+                pays = :pays
+            WHERE id = :idadresse
+            RETURNING id AS idadresse
+        ),
+        updated_personne AS (
+            UPDATE Personne
+            SET nom = :nom,
+                prenom = :prenom,
+                email = :email
+            WHERE id = :id
+            RETURNING id AS idpersonne
+        )
+        UPDATE Candidat
+        SET age = :age,
+            genre = :genre,
+            numerotel = :numerotel,
+            anneesexp = :anneesexp
+        WHERE idpersonne = :id
+        RETURNING idpersonne;
+        """
 
-            if age:
-                candidat_updates.append("age = :age")
-                candidat_values["age"] = age
-            if genre:
-                candidat_updates.append("genre = :genre")
-                candidat_values["genre"] = genre
-            if numeroTel:
-                candidat_updates.append("numeroTel = :numeroTel")
-                candidat_values["numeroTel"] = numeroTel
-            if anneesExp:
-                candidat_updates.append("anneesExp = :anneesExp")
-                candidat_values["anneesExp"] = anneesExp
+        await database.execute(
+            query=update_full_query,
+            values=dict(id=id, idadresse=idadresse, **data.dict()),
+        )
+        return success("Candidat updated successfully")
 
-            if candidat_updates:
-                update_candidat_query = f"""
-                UPDATE Candidat
-                SET {", ".join(candidat_updates)}
-                WHERE idPersonne = :id
-                """
-                await database.execute(query=update_candidat_query, values=candidat_values)
-
-            # Mise à jour de la table Adresse
-            adresse_updates = []
-            adresse_values = {}
-
-            if latitude:
-                adresse_updates.append("latitude = :latitude")
-                adresse_values["latitude"] = latitude
-            if longitude:
-                adresse_updates.append("longitude = :longitude")
-                adresse_values["longitude"] = longitude
-            if rue:
-                adresse_updates.append("rue = :rue")
-                adresse_values["rue"] = rue
-            if ville:
-                adresse_updates.append("ville = :ville")
-                adresse_values["ville"] = ville
-            if npa:
-                adresse_updates.append("npa = :npa")
-                adresse_values["npa"] = npa
-            if pays:
-                adresse_updates.append("pays = :pays")
-                adresse_values["pays"] = pays
-
-            if adresse_updates:
-                # Récupérer l'idAdresse du Candidat
-                get_adresse_query = "SELECT idAdresse FROM Candidat WHERE idPersonne = :id"
-                id_adresse = await database.fetch_val(query=get_adresse_query, values={"id": id})
-
-                if not id_adresse:
-                    raise Exception("Adresse introuvable pour ce candidat")
-
-                adresse_values["id"] = id_adresse
-
-                update_adresse_query = f"""
-                UPDATE Adresse
-                SET {", ".join(adresse_updates)}
-                WHERE id = :id
-                """
-                await database.execute(query=update_adresse_query, values=adresse_values)
-
-        return {"status": "success", "message": "Candidat mis à jour avec succès"}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
-
-
-
+    except PostgresError as e:
+        return error(str(e))
 
 
 @router.get("/offres", tags=["offres"])
-async def get_offres(request: Request):
+async def get_offres(request: Request) -> list[Offre]:
     try:
-        query = "SELECT * FROM offre"
+        query = "SELECT * FROM View_Offre;"
         data = await database.fetch_all(query=query)
+        return [dict(record) for record in data]
 
-        data_dict = []
-        for record in data:
-            record_dict = dict(record)
-            for key, value in record_dict.items():
-                if isinstance(value, (date, datetime)):
-                    record_dict[key] = value.isoformat()
-            data_dict.append(record_dict)
-
-        return templates.TemplateResponse(
-            request=request,
-            name="data.html",
-            context={"data": json.dumps(data_dict, indent=2)},
-        )
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
-
+    except PostgresError as e:
+        return error(str(e))
 
 
 @router.post("/offres", tags=["offres"])
-async def post_offres(
-    descriptionOffre: str,
-    nomPoste: str,
-    anneesExpRequises: int,
-    datePublication: date,
-    latitude: float,
-    longitude: float,
-    rue: str,
-    ville: str,
-    npa: str,
-    pays: str,
-    dateCloture: date | None = None,
-):
+async def post_offres(data: Annotated[OffreCreate, Form()]):
     try:
-        async with database.transaction():
-            insert_address_query = """
+        insert_full_query = """
+        WITH inserted_adresse AS (
             INSERT INTO Adresse (latitude, longitude, rue, ville, npa, pays)
             VALUES (:latitude, :longitude, :rue, :ville, :npa, :pays)
-            RETURNING id;
-            """
-            adresse_id = await database.execute(
-                query=insert_address_query,
-                values={
-                    "latitude": latitude,
-                    "longitude": longitude,
-                    "rue": rue,
-                    "ville": ville,
-                    "npa": npa,
-                    "pays": pays,
-                },
-            )
+            RETURNING id AS idadresse
+        )
+        INSERT INTO Offre (
+            idadresse, descriptionoffre, nomposte, anneesexprequises,
+            datepublication, datecloture
+        )
+        SELECT
+            inserted_adresse.idadresse,
+            :descriptionoffre,
+            :nomposte,
+            :anneesexprequises,
+            :datepublication,
+            :datecloture
+        FROM inserted_adresse;
+        """
 
-            insert_offre_query = """
-            INSERT INTO Offre (idAdresse, descriptionOffre, nomPoste, anneesExpRequises, datePublication, dateCloture)
-            VALUES (:idAdresse, :descriptionOffre, :nomPoste, :anneesExpRequises, :datePublication, :dateCloture)
-            """
-            await database.execute(
-                query=insert_offre_query,
-                values={
-                    "idAdresse": adresse_id,
-                    "descriptionOffre": descriptionOffre,
-                    "nomPoste": nomPoste,
-                    "anneesExpRequises": anneesExpRequises,
-                    "datePublication": datePublication,
-                    "dateCloture": dateCloture,
-                },
-            )
+        await database.execute(
+            query=insert_full_query,
+            values=data.dict(),
+        )
 
-        return {"status": "success", "message": "Offre ajoutée avec succès"}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
-
+        return success("Sucessfully added new offre")
+    except PostgresError as e:
+        return error(str(e))
 
 
 @router.put("/offres/{id}", tags=["offres"])
-async def put_offres(
-    id: int,
-    descriptionOffre: str | None = None,
-    nomPoste: str | None = None,
-    anneesExpRequises: int | None = None,
-    datePublication: date | None = None,
-    dateCloture: date | None = None,
-    latitude: float | None = None,
-    longitude: float | None = None,
-    rue: str | None = None,
-    ville: str | None = None,
-    npa: str | None = None,
-    pays: str | None = None,
-):
+async def put_offres(id: int, data: Annotated[OffreCreate, Form()]):
     try:
-        async with database.transaction():
-            # Mise à jour de la table Offre
-            offre_updates = []
-            offre_values = {"id": id}
+        # Retrieve the current idAdresse associated with the Offre
+        get_idadresse_query = """
+        SELECT idadresse
+        FROM Offre
+        WHERE id = :id;
+        """
 
-            if descriptionOffre:
-                offre_updates.append("descriptionOffre = :descriptionOffre")
-                offre_values["descriptionOffre"] = descriptionOffre
-            if nomPoste:
-                offre_updates.append("nomPoste = :nomPoste")
-                offre_values["nomPoste"] = nomPoste
-            if anneesExpRequises:
-                offre_updates.append("anneesExpRequises = :anneesExpRequises")
-                offre_values["anneesExpRequises"] = anneesExpRequises
-            if datePublication:
-                offre_updates.append("datePublication = :datePublication")
-                offre_values["datePublication"] = datePublication
-            if dateCloture:
-                offre_updates.append("dateCloture = :dateCloture")
-                offre_values["dateCloture"] = dateCloture
+        res = await database.fetch_one(query=get_idadresse_query, values=dict(id=id))
+        if not res:
+            return error("Offre address not found")
 
-            if offre_updates:
-                update_offre_query = f"""
-                UPDATE Offre
-                SET {", ".join(offre_updates)}
-                WHERE id = :id
-                """
-                await database.execute(query=update_offre_query, values=offre_values)
+        idadresse = res["idadresse"]
 
-            # Mise à jour de la table Adresse
-            adresse_updates = []
-            adresse_values = {}
+        update_full_query = """
+        WITH updated_adresse AS (
+            UPDATE Adresse
+            SET latitude = :latitude,
+                longitude = :longitude,
+                rue = :rue,
+                ville = :ville,
+                npa = :npa,
+                pays = :pays
+            WHERE id = :idadresse
+            RETURNING id AS idadresse
+        ),
+        updated_offre AS (
+            UPDATE Offre
+            SET descriptionoffre = :descriptionoffre,
+                nomposte = :nomposte,
+                anneesexprequises = :anneesexprequises,
+                datepublication = :datepublication,
+                datecloture = :datecloture
+            WHERE id = :id
+            RETURNING id AS idoffre
+        )
+        UPDATE Offre
+        SET idAdresse = updated_adresse.idadresse
+        FROM updated_adresse, updated_offre
+        WHERE Offre.id = :id;
+        """
 
-            if latitude:
-                adresse_updates.append("latitude = :latitude")
-                adresse_values["latitude"] = latitude
-            if longitude:
-                adresse_updates.append("longitude = :longitude")
-                adresse_values["longitude"] = longitude
-            if rue:
-                adresse_updates.append("rue = :rue")
-                adresse_values["rue"] = rue
-            if ville:
-                adresse_updates.append("ville = :ville")
-                adresse_values["ville"] = ville
-            if npa:
-                adresse_updates.append("npa = :npa")
-                adresse_values["npa"] = npa
-            if pays:
-                adresse_updates.append("pays = :pays")
-                adresse_values["pays"] = pays
+        await database.execute(
+            query=update_full_query,
+            values=dict(id=id, idadresse=idadresse, **data.dict()),
+        )
 
-            if adresse_updates:
-                # Récupérer l'idAdresse associé à l'Offre
-                get_adresse_query = "SELECT idAdresse FROM Offre WHERE id = :id"
-                id_adresse = await database.fetch_val(query=get_adresse_query, values={"id": id})
+        return {"status": "success", "message": "Offre updated successfully"}
 
-                if not id_adresse:
-                    raise Exception("Adresse introuvable pour cette offre")
+    except PostgresError as e:
+        return error(str(e))
 
-                adresse_values["id"] = id_adresse
-
-                update_adresse_query = f"""
-                UPDATE Adresse
-                SET {", ".join(adresse_updates)}
-                WHERE id = :id
-                """
-                await database.execute(query=update_adresse_query, values=adresse_values)
-
-        return {"status": "success", "message": "Offre mise à jour avec succès"}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
-
-
-
-
-from datetime import date, datetime
 
 @router.get("/interactions", tags=["interactions"])
 async def get_interactions(request: Request):
     try:
+        # TODO: Create views for each interaction type and make 3 queries here
         query = "SELECT * FROM interaction"
         data = await database.fetch_all(query=query)
+        return [dict(record) for record in data]
 
-        data_dict = []
-        for record in data:
-            record_dict = dict(record)
-            for key, value in record_dict.items():
-                if isinstance(value, (date, datetime)):
-                    record_dict[key] = value.isoformat()
-            data_dict.append(record_dict)
-
-        return templates.TemplateResponse(
-            request=request,
-            name="data.html",
-            context={"data": json.dumps(data_dict, indent=2)},
-        )
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
-
+    except PostgresError as e:
+        return error(str(e))

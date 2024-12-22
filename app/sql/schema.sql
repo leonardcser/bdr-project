@@ -69,11 +69,45 @@ CREATE TABLE Candidat (
     CHECK (age >= 16 AND age < 100)
 );
 
+CREATE OR REPLACE VIEW View_Candidat AS
+SELECT 
+    p.id,
+    p.nom,
+    p.prenom,
+    p.email,
+    c.age,
+    c.genre,
+    c.numeroTel,
+    c.anneesExp,
+    a.latitude,
+    a.longitude,
+    a.rue,
+    a.ville,
+    a.npa,
+    a.pays
+FROM 
+    Candidat c
+INNER JOIN 
+    Personne p ON c.idPersonne = p.id
+INNER JOIN 
+    Adresse a ON c.idAdresse = a.id;
+
 CREATE TABLE Recruteur (
     idPersonne INTEGER,
     CONSTRAINT PK_Recruteur PRIMARY KEY(idPersonne),
     CONSTRAINT FK_Personne FOREIGN KEY (idPersonne) REFERENCES Personne(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+CREATE OR REPLACE VIEW View_Recruteur AS
+SELECT 
+    p.id,
+    p.nom,
+    p.prenom,
+    p.email
+FROM 
+    Recruteur r
+INNER JOIN 
+    Personne p ON r.idPersonne = p.id;
 
 CREATE TABLE Recruteur_Candidat (
     idRecruteur INTEGER,
@@ -173,6 +207,24 @@ CREATE TABLE Offre (
     CHECK (dateCloture IS NULL OR dateCloture > datePublication)
 );
 
+CREATE OR REPLACE VIEW View_Offre AS
+SELECT 
+    o.id,
+    o.descriptionOffre,
+    o.nomPoste,
+    o.anneesExpRequises,
+    o.datePublication,
+    o.dateCloture,
+    a.latitude,
+    a.longitude,
+    a.rue,
+    a.ville,
+    a.npa,
+    a.pays
+FROM 
+    Offre o
+INNER JOIN 
+    Adresse a ON o.idAdresse = a.id;
 
 CREATE TABLE Contrat_Travail (
     id serial,
