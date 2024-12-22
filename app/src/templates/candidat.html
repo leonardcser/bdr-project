@@ -3,7 +3,7 @@
 {% block content %}
 <small>Candidat</small>
 <h1>{{ candidat.nom }} {{ candidat.prenom }}</h1>
-<div style="overflow-x: auto; width: 100%;">
+<figure>
   <table>
     <thead>
       <tr>
@@ -38,7 +38,10 @@
       </tr>
     </tbody>
   </table>
-</div>
+</figure>
+<a href="/candidat/{{ candidat.id }}/edit">
+  Modifier
+</a>
 <div>TODO interactions</div>
 <div>TODO emploi</div>
 <div>TODO offres</div>
