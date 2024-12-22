@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<small>Candidat</small>
+<h1>{{ candidat.nom }} {{ candidat.prenom }}</h1>
+<div style="overflow-x: auto; width: 100%;">
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nom</th>
+        <th>Prénom</th>
+        <th>Email</th>
+        <th>Âge</th>
+        <th>Genre</th>
+        <th>Numéro de téléphone</th>
+        <th>Années d'expérience</th>
+        <th>Rue</th>
+        <th>Ville</th>
+        <th>NPA</th>
+        <th>Pays</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ candidat.id }}</td>
+        <td>{{ candidat.nom }}</td>
+        <td>{{ candidat.prenom }}</td>
+        <td>{{ candidat.email }}</td>
+        <td>{{ candidat.age }}</td>
+        <td>{{ candidat.genre }}</td>
+        <td>{{ candidat.numerotel }}</td>
+        <td>{{ candidat.anneesexp }}</td>
+        <td>{{ candidat.rue }}</td>
+        <td>{{ candidat.ville }}</td>
+        <td>{{ candidat.npa }}</td>
+        <td>{{ candidat.pays }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div>TODO interactions</div>
+<div>TODO emploi</div>
+<div>TODO offres</div>
+{% endblock %}

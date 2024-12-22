@@ -25,20 +25,40 @@ def error(msg: str | None = None):
     return res
 
 
-@router.get("/", response_class=HTMLResponse)
-async def home(request: Request):
+@router.get("/")
+async def home(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(request=request, name="base.html")
 
 
 @router.get("/candidats", tags=["candidats"])
-async def get_candidats(request: Request) -> list[Candidat]:
+async def get_candidats(request: Request) -> HTMLResponse:
     try:
         query = "SELECT * FROM View_Candidat;"
         data = await database.fetch_all(query=query)
-        return [dict(record) for record in data]
+        data = [dict(record) for record in data]
+        return templates.TemplateResponse(
+            request=request, name="candidats.html", context=dict(candidats=data)
+        )
 
     except PostgresError as e:
-        return error(str(e))
+        return templates.TemplateResponse(
+            request=request, name="error.html", context=dict(msg=str(e))
+        )
+
+
+@router.get("/candidats/{id}", tags=["candidats"])
+async def get_candidats_detail(request: Request, id: int) -> HTMLResponse:
+    try:
+        query = "SELECT * FROM View_Candidat WHERE id = :id;"
+        data = await database.fetch_one(query=query, values=dict(id=id))
+        return templates.TemplateResponse(
+            request=request, name="candidat.html", context=dict(candidat=dict(data))
+        )
+
+    except PostgresError as e:
+        return templates.TemplateResponse(
+            request=request, name="error.html", context=dict(msg=str(e))
+        )
 
 
 @router.post("/candidats", tags=["candidats"])

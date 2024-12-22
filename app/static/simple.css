@@ -72,7 +72,7 @@ html {
 body {
   color: var(--text);
   background-color: var(--bg);
-  font-size: 1.15rem;
+  font-size: 1rem;
   line-height: 1.5;
   display: grid;
   grid-template-columns: 1fr 6fr; /* Sidebar and content widths */
@@ -83,6 +83,7 @@ body {
 body > main {
   grid-column: 2;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 2rem;
 }
 
@@ -187,6 +188,7 @@ h4,
 h5,
 h6 {
   overflow-wrap: break-word;
+  margin: 0 0 0.5rem 0;
 }
 
 /* Fix line height when title wraps */
@@ -194,6 +196,11 @@ h1,
 h2,
 h3 {
   line-height: 1.1;
+}
+
+small {
+  font-size: 1.5rem !important;
+  color: var(--text-light);
 }
 
 /* Reduce header size on mobile */
@@ -437,6 +444,16 @@ details[open] > :last-child {
 table {
   border-collapse: collapse;
   margin: 1.5rem 0;
+}
+
+td > a {
+  /* border: 1px solid var(--border); */
+  border-radius: var(--standard-border-radius);
+  background-color: var(--accent);
+  color: var(--text) !important;
+  display: inline-block;
+  padding: 0.1rem 1rem;
+  text-decoration: none;
 }
 
 figure > table {
