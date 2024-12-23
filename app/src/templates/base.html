@@ -16,10 +16,10 @@
         <ion-icon name="people-circle-outline"></ion-icon><span class="caccent">R</span>ecruta
       </h2>
       <small>Liens</small>
-      <a href="/">
+      <a href="/" class="{{ is_current('/') }}">
         <ion-icon name="home"></ion-icon>Accueil
       </a>
-      <a href="/candidats">
+      <a href="/candidats" class="{{ is_current('/candidats') }}">
         <ion-icon name="person"></ion-icon>Candidats
       </a>
       <a href="/">
@@ -27,7 +27,7 @@
       </a>
 
       <small>Actions</small>
-      <a href="/candidat-new">
+      <a href="/candidat-new" class="{{ is_current('/candidat-new') }}">
         <ion-icon name="add-circle"></ion-icon>Candidat
       </a>
       <a href="/">
