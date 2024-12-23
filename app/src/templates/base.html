@@ -5,27 +5,48 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Recruta</title>
-  <link href="static/simple.css" rel="stylesheet" />
+  <link href="/static/simple.css" rel="stylesheet" />
+  <link rel="preload" href="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js" as="script">
 </head>
 
 <body>
   <header>
     <nav>
-      <h2>Recruta</h2>
-      <a href="#">Accueil</a>
-      <a href="#">Suivi</a>
-      <a href="#">Historique</a>
+      <h2>
+        <ion-icon name="people-circle-outline"></ion-icon><span class="caccent">R</span>ecruta
+      </h2>
+      <small>Liens</small>
+      <a href="/" class="{{ is_current('/') }}">
+        <ion-icon name="home"></ion-icon>Accueil
+      </a>
+      <a href="/candidats" class="{{ is_current('/candidats') }}">
+        <ion-icon name="person"></ion-icon>Candidats
+      </a>
+      <a href="/">
+        <ion-icon name="business"></ion-icon>Offres
+      </a>
+
+      <small>Actions</small>
+      <a href="/candidat-new" class="{{ is_current('/candidat-new') }}">
+        <ion-icon name="add-circle"></ion-icon>Candidat
+      </a>
+      <a href="/">
+        <ion-icon name="add-circle"></ion-icon>Offres
+      </a>
     </nav>
   </header>
   <main>
-    <h1>Nothing here yet...</h1>
     {% block content %}
+    <h1>Nothing here yet...</h1>
     {% endblock %}
   </main>
   <!-- Hot Reloading -->
   {% if DEVELOPMENT %}
   {{ hotreload.script(url_for('hot-reload')) | safe }}
   {% endif %}
+  <!-- Icons -->
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 </body>
 
 </html>

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Candidats</h1>
+<figure>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nom</th>
+        <th>Prénom</th>
+        <th>Email</th>
+        <th>Âge</th>
+        <th>Genre</th>
+        <th>Numéro de téléphone</th>
+        <th>Années d'expérience</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for candidat in candidats %}
+      <tr>
+        <td>{{ candidat.id }}</td>
+        <td>{{ candidat.nom }}</td>
+        <td>{{ candidat.prenom }}</td>
+        <td>{{ candidat.email }}</td>
+        <td>{{ candidat.age }}</td>
+        <td>{{ candidat.genre }}</td>
+        <td>{{ candidat.numerotel }}</td>
+        <td>{{ candidat.anneesexp }}</td>
+        <td>
+          <a href="/candidats/{{ candidat.id }}">
+            Profile
+          </a>
+          <a href="/candidat/{{ candidat.id }}/edit">
+            Modifier
+          </a>
+
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</figure>
+{% endblock %}
