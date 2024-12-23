@@ -19,6 +19,7 @@
   --accent-hover: #5f9fc6;
   --accent-text: var(--bg);
   --code: #d81b60;
+  --code-hover: #af164f;
   --preformatted: #444;
   --marked: #ffdd33;
   --disabled: #efefef;
@@ -36,7 +37,8 @@
     --accent: #4a8ab2;
     --accent-hover: #3d7191;
     --accent-text: var(--text);
-    --code: #f06292;
+    --code: #e04c7d;
+    --code-hover: #b73e66;
     --preformatted: #ccc;
     --disabled: #111;
   }
@@ -49,6 +51,14 @@
 
 .caccent {
   color: var(--accent);
+}
+
+.badge {
+  padding: 0.2rem 0.4rem;
+  background-color: var(--accent);
+  display: inline;
+  border-radius: var(--standard-border-radius);
+  font-size: 0.8rem;
 }
 
 a {
@@ -278,12 +288,22 @@ a.button, /* extra specificity to override a */
 input[type="submit"],
 input[type="reset"],
 input[type="button"] {
-  border: 1px solid var(--accent);
+  border: none;
   background-color: var(--accent);
   color: var(--accent-text);
-  padding: 0.5rem 0.9rem;
+  padding: 0.25rem 0.75rem;
   text-decoration: none;
-  line-height: normal;
+  line-height: 0.8;
+  font-weight: 600;
+  transition: background-color 100ms ease-in-out;
+}
+
+.destructive {
+  background-color: var(--code);
+}
+
+button.destructive:hover {
+  background-color: var(--code-hover) !important;
 }
 
 .button[aria-disabled="true"],

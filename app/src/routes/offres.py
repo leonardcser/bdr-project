@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Annotated
 
 from asyncpg import PostgresError
@@ -158,4 +159,25 @@ async def put_offres(request: Request, id: int, data: Annotated[OffreCreate, For
             request=request,
             name="offre-update.html",
             context=dict(method="put", offre=data, error=str(e)),
+        )
+
+
+@router.post("/offres/{id}/close", tags=["offres"])
+async def close_offres(request: Request, id: int):
+    close_query = """
+    UPDATE Offre
+    SET datecloture = :datecloture
+    WHERE id = :id
+    """
+    try:
+        await database.execute(
+            query=close_query, values=dict(id=id, datecloture=datetime.utcnow())
+        )
+        return RedirectResponse(url=f"/offres/{id}", status_code=303)
+
+    except PostgresError as e:
+        return templates.TemplateResponse(
+            request=request,
+            name="error.html",
+            context=dict(error=str(e)),
         )

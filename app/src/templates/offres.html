@@ -23,6 +23,13 @@
         <td>{{ offre.datepublication }}</td>
         <td>{{ offre.datecloture|default('-', true) }}</td>
         <td>
+          {% if offre.datecloture == None %}
+            <form action="/offres/{{ offre.id }}/close" method="post">
+              <button type="submit" class="destructive">
+                Clôturer
+              </button>
+            </form>
+          {% endif %}
           <a href="/offres/{{ offre.id }}">
             Détails
           </a>

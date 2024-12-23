@@ -4,6 +4,13 @@
 <small>Offre</small>
 <h1>{{ offre.nomposte }}</h1>
 <p>{{ offre.descriptionoffre }}</p>
+
+{% if offre.datecloture == None %}
+  <p class="badge">Ouverte</p>
+{% else %}
+  <p class="badge destructive">Cloturée</p>
+{% endif %}
+
 <figure>
   <table>
     <thead>
