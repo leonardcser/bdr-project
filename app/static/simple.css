@@ -14,10 +14,12 @@
   --text: #212121;
   --text-light: #585858;
   --border: #898ea4;
-  --accent: #4a8ab2;
-  --accent-hover: #3d7191;
+  --accent-light: #6fb2db19;
+  --accent: #6fb2db;
+  --accent-hover: #5f9fc6;
   --accent-text: var(--bg);
   --code: #d81b60;
+  --code-hover: #af164f;
   --preformatted: #444;
   --marked: #ffdd33;
   --disabled: #efefef;
@@ -31,10 +33,12 @@
     --accent-bg: #212121;
     --text: #dcdcdc;
     --text-light: #ababab;
+    --accent-light: #6fb2db19;
     --accent: #4a8ab2;
     --accent-hover: #3d7191;
     --accent-text: var(--text);
-    --code: #f06292;
+    --code: #e04c7d;
+    --code-hover: #b73e66;
     --preformatted: #ccc;
     --disabled: #111;
   }
@@ -49,14 +53,29 @@
   color: var(--accent);
 }
 
+.badge {
+  padding: 0.2rem 0.4rem;
+  background-color: var(--accent);
+  display: inline;
+  border-radius: var(--standard-border-radius);
+  font-size: 0.8rem;
+}
+
 a {
   border-radius: var(--standard-border-radius);
   background-color: var(--accent);
-  color: var(--accent-text) !important;
+  color: var(--text) !important;
   display: inline-block;
   padding: 0.25rem 0.75rem;
   font-weight: 600;
   text-decoration: none;
+  transition:
+    color 100ms ease-in-out,
+    background-color 100ms ease-in-out;
+}
+
+a:hover {
+  background-color: var(--accent-hover);
 }
 
 form {
@@ -89,6 +108,10 @@ progress {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
+}
+
+textarea {
+  resize: none;
 }
 
 html {
@@ -130,6 +153,7 @@ body > header > nav {
   padding: 0;
   display: flex;
   flex-direction: column;
+  gap: 0.25rem;
 }
 
 body > header > nav > h2 {
@@ -264,12 +288,22 @@ a.button, /* extra specificity to override a */
 input[type="submit"],
 input[type="reset"],
 input[type="button"] {
-  border: 1px solid var(--accent);
+  border: none;
   background-color: var(--accent);
   color: var(--accent-text);
-  padding: 0.5rem 0.9rem;
+  padding: 0.25rem 0.75rem;
   text-decoration: none;
-  line-height: normal;
+  line-height: 0.8;
+  font-weight: 600;
+  transition: background-color 100ms ease-in-out;
+}
+
+.destructive {
+  background-color: var(--code);
+}
+
+button.destructive:hover {
+  background-color: var(--code-hover) !important;
 }
 
 .button[aria-disabled="true"],
@@ -363,11 +397,14 @@ header > nav a[aria-current="page"],
 header > nav a[aria-current="true"] {
   color: var(--accent) !important;
   cursor: pointer;
+  background-color: var(--accent-light);
 }
 
 header > nav > a > ion-icon {
   margin-right: 0.5rem;
   flex-shrink: 0;
+  width: 16px;
+  height: 16px;
 }
 
 header > nav > small {
@@ -382,9 +419,8 @@ header > nav > small {
 @media only screen and (max-width: 720px) {
   header > nav a {
     border: none;
-    padding: 0;
-    text-decoration: underline;
-    line-height: 1;
+    padding: 0.1rem 1.5rem;
+    line-height: 1.5;
   }
 }
 

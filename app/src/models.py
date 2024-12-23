@@ -35,9 +35,9 @@ class OffreCreate(Adresse):
     descriptionoffre: str
     nomposte: str
     anneesexprequises: int
-    datepublication: date
-    datecloture: date | None = None
 
 
 class Offre(OffreCreate):
     id: int
+    datepublication: date
+    datecloture: date | None = None

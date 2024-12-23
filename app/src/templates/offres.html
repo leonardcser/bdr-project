@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Offres</h1>
+<figure>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Poste</th>
+        <th>Années d'expérience requises</th>
+        <th>Date de publication</th>
+        <th>Date de clôture</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for offre in offres %}
+      <tr>
+        <td>{{ offre.id }}</td>
+        <td>{{ offre.nomposte }}</td>
+        <td>{{ offre.anneesexprequises }}</td>
+        <td>{{ offre.datepublication }}</td>
+        <td>{{ offre.datecloture|default('-', true) }}</td>
+        <td>
+          {% if offre.datecloture == None %}
+            <form action="/offres/{{ offre.id }}/close" method="post">
+              <button type="submit" class="destructive">
+                Clôturer
+              </button>
+            </form>
+          {% endif %}
+          <a href="/offres/{{ offre.id }}">
+            Détails
+          </a>
+          <a href="/offre/{{ offre.id }}/edit">
+            Modifier
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</figure>
+{% endblock %}
