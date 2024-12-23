@@ -7,6 +7,7 @@
   <title>Recruta</title>
   <link href="/static/simple.css" rel="stylesheet" />
   <link rel="preload" href="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js" as="script">
+  <link rel="preload" href="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js" as="script">
 </head>
 
 <body>
@@ -22,16 +23,16 @@
       <a href="/candidats" class="{{ is_current('/candidats') }}">
         <ion-icon name="person"></ion-icon>Candidats
       </a>
-      <a href="/">
+      <a href="/offres" class="{{ is_current('/offres') }}">
         <ion-icon name="business"></ion-icon>Offres
       </a>
 
       <small>Actions</small>
       <a href="/candidat-new" class="{{ is_current('/candidat-new') }}">
-        <ion-icon name="add-circle"></ion-icon>Candidat
+        <ion-icon name="add"></ion-icon>Candidat
       </a>
-      <a href="/">
-        <ion-icon name="add-circle"></ion-icon>Offres
+      <a href="/offre-new" class="{{ is_current('/offre-new') }}">
+        <ion-icon name="add"></ion-icon>Offre
       </a>
     </nav>
   </header>

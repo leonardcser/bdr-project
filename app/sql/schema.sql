@@ -50,8 +50,8 @@ CREATE TABLE Adresse (
     npa VARCHAR(255) NOT NULL,
     pays VARCHAR(255) NOT NULL,
     CONSTRAINT PK_Adresse PRIMARY KEY(id),
-    CHECK (latitude > -90 AND latitude < 90),
-    CHECK (longitude > -180 AND longitude < 180)
+    CHECK (latitude >= -90 AND latitude <= 90),
+    CHECK (longitude >= -180 AND longitude <= 180)
 );
 
 CREATE TYPE Genre AS ENUM ('Femme', 'Homme', 'Autre');
@@ -200,7 +200,7 @@ CREATE TABLE Offre (
     descriptionOffre VARCHAR(255) NOT NULL,
     nomPoste VARCHAR(255) NOT NULL,
     anneesExpRequises SMALLINT NOT NULL,
-    datePublication date NOT NULL,
+    datePublication DATE NOT NULL DEFAULT now(),
     dateCloture date,
     CONSTRAINT PK_Offre PRIMARY KEY(id),
     CONSTRAINT FK_Adresse FOREIGN KEY (idAdresse) REFERENCES Adresse(id) ON DELETE RESTRICT ON UPDATE NO ACTION,

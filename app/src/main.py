@@ -11,5 +11,5 @@ app = FastAPI(
     on_startup=[hotreload.startup, connect],
     on_shutdown=[hotreload.shutdown, database.disconnect],
 )
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory="static", html=True), name="static")
 app.include_router(router)

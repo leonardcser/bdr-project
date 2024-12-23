@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<small>Offre</small>
+<h1>{{ offre.nomposte }}</h1>
+<p>{{ offre.descriptionoffre }}</p>
+<figure>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Années d'expérience requises</th>
+        <th>Date de publication</th>
+        <th>Date de clôture</th>
+        <th>Rue</th>
+        <th>Ville</th>
+        <th>NPA</th>
+        <th>Pays</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ offre.id }}</td>
+        <td>{{ offre.anneesexprequises }}</td>
+        <td>{{ offre.datepublication }}</td>
+        <td>{{ offre.datecloture|default('-', true) }}</td>
+        <td>{{ offre.rue }}</td>
+        <td>{{ offre.ville }}</td>
+        <td>{{ offre.npa }}</td>
+        <td>{{ offre.pays }}</td>
+      </tr>
+    </tbody>
+  </table>
+</figure>
+<a href="/offre/{{ offre.id }}/edit">
+  Modifier
+</a>
+<div>TODO candidats</div>
+{% endblock %}

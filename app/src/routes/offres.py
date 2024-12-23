@@ -2,26 +2,72 @@ from typing import Annotated
 
 from asyncpg import PostgresError
 from fastapi import Form, Request
+from fastapi.responses import HTMLResponse, RedirectResponse
 
+from config import templates
 from db import database
-from models import Offre, OffreCreate
+from models import OffreCreate
 from routes import router
-from routes.utils import error, success
 
 
 @router.get("/offres", tags=["offres"])
-async def get_offres(request: Request) -> list[Offre]:
+async def get_offres(request: Request) -> HTMLResponse:
     try:
         query = "SELECT * FROM View_Offre;"
         data = await database.fetch_all(query=query)
-        return [dict(record) for record in data]
+        return templates.TemplateResponse(
+            request=request, name="offres.html", context=dict(offres=data)
+        )
 
     except PostgresError as e:
-        return error(str(e))
+        return templates.TemplateResponse(
+            request=request, name="error.html", context=dict(error=str(e))
+        )
+
+
+@router.get("/offres/{id}", tags=["offres"])
+async def get_offres_detail(request: Request, id: int) -> HTMLResponse:
+    try:
+        query = "SELECT * FROM View_Offre WHERE id = :id;"
+        data = await database.fetch_one(query=query, values=dict(id=id))
+        return templates.TemplateResponse(
+            request=request, name="offre.html", context=dict(offre=dict(data))
+        )
+
+    except PostgresError as e:
+        return templates.TemplateResponse(
+            request=request, name="error.html", context=dict(error=str(e))
+        )
+
+
+@router.get("/offre-new", tags=["offres"])
+async def get_offres_new(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse(
+        request=request,
+        name="offre-update.html",
+        context=dict(method="post", offre=None),
+    )
+
+
+@router.get("/offre/{id}/edit", tags=["offres"])
+async def get_offres_update(request: Request, id: int) -> HTMLResponse:
+    try:
+        query = "SELECT * FROM View_Offre WHERE id = :id;"
+        data = await database.fetch_one(query=query, values=dict(id=id))
+        return templates.TemplateResponse(
+            request=request,
+            name="offre-update.html",
+            context=dict(method="put", offre=dict(data)),
+        )
+
+    except PostgresError as e:
+        return templates.TemplateResponse(
+            request=request, name="error.html", context=dict(error=str(e))
+        )
 
 
 @router.post("/offres", tags=["offres"])
-async def post_offres(data: Annotated[OffreCreate, Form()]):
+async def post_offres(request: Request, data: Annotated[OffreCreate, Form()]):
     try:
         insert_full_query = """
         WITH inserted_adresse AS (
@@ -30,16 +76,13 @@ async def post_offres(data: Annotated[OffreCreate, Form()]):
             RETURNING id AS idadresse
         )
         INSERT INTO Offre (
-            idadresse, descriptionoffre, nomposte, anneesexprequises,
-            datepublication, datecloture
+            idadresse, descriptionoffre, nomposte, anneesexprequises
         )
         SELECT
             inserted_adresse.idadresse,
             :descriptionoffre,
             :nomposte,
-            :anneesexprequises,
-            :datepublication,
-            :datecloture
+            :anneesexprequises
         FROM inserted_adresse;
         """
 
@@ -48,13 +91,17 @@ async def post_offres(data: Annotated[OffreCreate, Form()]):
             values=data.dict(),
         )
 
-        return success("Sucessfully added new offre")
+        return RedirectResponse("/offres", status_code=303)
     except PostgresError as e:
-        return error(str(e))
+        return templates.TemplateResponse(
+            request=request,
+            name="offre-update.html",
+            context=dict(method="post", offre=data, error=str(e)),
+        )
 
 
-@router.put("/offres/{id}", tags=["offres"])
-async def put_offres(id: int, data: Annotated[OffreCreate, Form()]):
+@router.post("/offres/{id}/edit", tags=["offres"])
+async def put_offres(request: Request, id: int, data: Annotated[OffreCreate, Form()]):
     try:
         # Retrieve the current idAdresse associated with the Offre
         get_idadresse_query = """
@@ -65,7 +112,11 @@ async def put_offres(id: int, data: Annotated[OffreCreate, Form()]):
 
         res = await database.fetch_one(query=get_idadresse_query, values=dict(id=id))
         if not res:
-            return error("Offre address not found")
+            return templates.TemplateResponse(
+                request=request,
+                name="offre-update.html",
+                context=dict(method="put", offre=data, error="offre adresse not found"),
+            )
 
         idadresse = res["idadresse"]
 
@@ -86,7 +137,6 @@ async def put_offres(id: int, data: Annotated[OffreCreate, Form()]):
             SET descriptionoffre = :descriptionoffre,
                 nomposte = :nomposte,
                 anneesexprequises = :anneesexprequises,
-                datepublication = :datepublication,
                 datecloture = :datecloture
             WHERE id = :id
             RETURNING id AS idoffre
@@ -101,8 +151,11 @@ async def put_offres(id: int, data: Annotated[OffreCreate, Form()]):
             query=update_full_query,
             values=dict(id=id, idadresse=idadresse, **data.dict()),
         )
-
-        return {"status": "success", "message": "Offre updated successfully"}
+        return RedirectResponse("/offres", status_code=303)
 
     except PostgresError as e:
-        return error(str(e))
+        return templates.TemplateResponse(
+            request=request,
+            name="offre-update.html",
+            context=dict(method="put", offre=data, error=str(e)),
+        )

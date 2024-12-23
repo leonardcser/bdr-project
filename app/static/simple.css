@@ -14,8 +14,9 @@
   --text: #212121;
   --text-light: #585858;
   --border: #898ea4;
-  --accent: #4a8ab2;
-  --accent-hover: #3d7191;
+  --accent-light: #6fb2db19;
+  --accent: #6fb2db;
+  --accent-hover: #5f9fc6;
   --accent-text: var(--bg);
   --code: #d81b60;
   --preformatted: #444;
@@ -31,6 +32,7 @@
     --accent-bg: #212121;
     --text: #dcdcdc;
     --text-light: #ababab;
+    --accent-light: #6fb2db19;
     --accent: #4a8ab2;
     --accent-hover: #3d7191;
     --accent-text: var(--text);
@@ -52,11 +54,18 @@
 a {
   border-radius: var(--standard-border-radius);
   background-color: var(--accent);
-  color: var(--accent-text) !important;
+  color: var(--text) !important;
   display: inline-block;
   padding: 0.25rem 0.75rem;
   font-weight: 600;
   text-decoration: none;
+  transition:
+    color 100ms ease-in-out,
+    background-color 100ms ease-in-out;
+}
+
+a:hover {
+  background-color: var(--accent-hover);
 }
 
 form {
@@ -89,6 +98,10 @@ progress {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
+}
+
+textarea {
+  resize: none;
 }
 
 html {
@@ -130,6 +143,7 @@ body > header > nav {
   padding: 0;
   display: flex;
   flex-direction: column;
+  gap: 0.25rem;
 }
 
 body > header > nav > h2 {
@@ -363,11 +377,14 @@ header > nav a[aria-current="page"],
 header > nav a[aria-current="true"] {
   color: var(--accent) !important;
   cursor: pointer;
+  background-color: var(--accent-light);
 }
 
 header > nav > a > ion-icon {
   margin-right: 0.5rem;
   flex-shrink: 0;
+  width: 16px;
+  height: 16px;
 }
 
 header > nav > small {
@@ -382,9 +399,8 @@ header > nav > small {
 @media only screen and (max-width: 720px) {
   header > nav a {
     border: none;
-    padding: 0;
-    text-decoration: underline;
-    line-height: 1;
+    padding: 0.1rem 1.5rem;
+    line-height: 1.5;
   }
 }
 
