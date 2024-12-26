@@ -34,10 +34,31 @@ async def get_candidats(request: Request) -> HTMLResponse:
 @router.get("/candidats/{id}", tags=["candidats"])
 async def get_candidats_detail(request: Request, id: int) -> HTMLResponse:
     try:
-        query = "SELECT * FROM View_Candidat WHERE id = :id;"
-        data = await database.fetch_one(query=query, values=dict(id=id))
+        query_candidat = "SELECT * FROM View_Candidat WHERE id = :id;"
+        query_offres_candidat = """SELECT * FROM Candidat_Offre co
+        INNER JOIN Offre o ON co.idOffre = o.id
+        WHERE co.idCandidat = :id;
+        """
+        async with database.transaction():
+            candidat = await database.fetch_one(query=query_candidat, values=dict(id=1))
+            offres = await database.fetch_all(
+                query=query_offres_candidat, values=dict(id=1)
+            )
+
+        if candidat is None:
+            # TODO: Return Not found
+            return templates.TemplateResponse(
+                request=request,
+                name="error.html",
+                context=dict(error="Candidat not found"),
+            )
+
+        data = dict(
+            candidat=dict(candidat),
+            offres=[dict(record) for record in offres],
+        )
         return templates.TemplateResponse(
-            request=request, name="candidat.html", context=dict(candidat=dict(data))
+            request=request, name="candidat.html", context=dict(data=data)
         )
 
     except PostgresError as e:
