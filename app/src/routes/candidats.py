@@ -16,10 +16,14 @@ async def home(request: Request) -> HTMLResponse:
 
 
 @router.get("/candidats", tags=["candidats"])
-async def get_candidats(request: Request) -> HTMLResponse:
+async def get_candidats(request: Request, idOffre : int = None) -> HTMLResponse:
     try:
-        query = "SELECT * FROM View_Candidat;"
-        data = await database.fetch_all(query=query)
+        if idOffre is None :
+            query = "SELECT * FROM View_Candidat;"
+            data = await database.fetch_all(query=query)
+        else :
+            query = "SELECT * FROM View_Candidat INNER JOIN Candidat_Offre ON View_Candidat.id = Candidat_Offre.idCandidat WHERE Candidat_Offre.idOffre = :idOffre;"
+            data = await database.fetch_all(query=query, values = {"idOffre": idOffre})
         data = [dict(record) for record in data]
         return templates.TemplateResponse(
             request=request, name="candidats.html", context=dict(candidats=data)

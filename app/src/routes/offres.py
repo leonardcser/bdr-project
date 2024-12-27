@@ -12,10 +12,15 @@ from routes import router
 
 
 @router.get("/offres", tags=["offres"])
-async def get_offres(request: Request) -> HTMLResponse:
+async def get_offres(request: Request, idCandidat : int = None) -> HTMLResponse:
     try:
-        query = "SELECT * FROM View_Offre;"
-        data = await database.fetch_all(query=query)
+        if idCandidat is None :
+            query = "SELECT * FROM View_Offre;"
+            data = await database.fetch_all(query=query)
+        else :
+            query = "SELECT * FROM View_Offre INNER JOIN Candidat_Offre ON View_Offre.id = Candidat_Offre.idOffre WHERE Candidat_Offre.idCandidat = :idCandidat;"
+            data = await database.fetch_all(query=query, values = {"idCandidat": idCandidat})
+    
         return templates.TemplateResponse(
             request=request, name="offres.html", context=dict(offres=data)
         )
