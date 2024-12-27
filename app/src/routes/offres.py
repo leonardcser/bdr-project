@@ -67,6 +67,21 @@ async def get_offres_update(request: Request, id: int) -> HTMLResponse:
         )
 
 
+@router.get("/offres_pour_candidat/{idCandidat}", tags=["offres"])
+async def get_offres_pour_candidat(request: Request, idCandidat: int) -> HTMLResponse:
+    try:
+        query = "SELECT * FROM View_Offre INNER JOIN Candidat_Offre ON View_Offre.id = Candidat_Offre.idOffre WHERE Candidat_Offre.idCandidat = :idCandidat;"
+        data = await database.fetch_all(query=query, values = {"idCandidat": idCandidat})
+        return templates.TemplateResponse(
+            request=request, name="offres.html", context=dict(offres=data)
+        )
+
+    except PostgresError as e:
+        return templates.TemplateResponse(
+            request=request, name="error.html", context=dict(error=str(e))
+        )
+
+
 @router.post("/offres", tags=["offres"])
 async def post_offres(request: Request, data: Annotated[OffreCreate, Form()]):
     try:

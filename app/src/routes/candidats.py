@@ -71,6 +71,20 @@ async def get_candidats_update(request: Request, id: int) -> HTMLResponse:
             request=request, name="error.html", context=dict(error=str(e))
         )
 
+@router.get("/candidats_pour_offre/{idOffre}", tags=["candidats"])
+async def get_candidats_pour_offre(request: Request, idOffre: int) -> HTMLResponse:
+    try:
+        query = "SELECT * FROM View_Candidat INNER JOIN Candidat_Offre ON View_Candidat.id = Candidat_Offre.idCandidat WHERE Candidat_Offre.idOffre = :idOffre;"
+        data = await database.fetch_all(query=query, values = {"idOffre": idOffre})
+        data = [dict(record) for record in data]
+        return templates.TemplateResponse(
+            request=request, name="candidats.html", context=dict(candidats=data)
+        )
+
+    except PostgresError as e:
+        return templates.TemplateResponse(
+            request=request, name="error.html", context=dict(error=str(e))
+        )
 
 @router.post("/candidats", tags=["candidats"])
 async def post_candidats(
