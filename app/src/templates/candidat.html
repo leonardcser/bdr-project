@@ -42,6 +42,9 @@
 <a href="/candidat/{{ data.candidat.id }}/edit">
   Modifier
 </a>
+<a href="/offres?idcandidat={{ data.candidat.id }}">
+  Voir les postulations
+</a>
 <figure>
   <h3>Offres</h3>
   <table>
@@ -78,9 +81,6 @@
           </a>
           <a href="/offre/{{ offre.id }}/edit">
             Modifier
-          </a>
-          <a href="/offres?idCandidat={{ candidat.id }}">
-            Voir les postulations
           </a>
         </td>
       </tr>
