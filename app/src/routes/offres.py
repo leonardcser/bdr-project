@@ -12,10 +12,17 @@ from routes import router
 
 
 @router.get("/offres", tags=["offres"])
-async def get_offres(request: Request) -> HTMLResponse:
+async def get_offres(request: Request, idcandidat: int | None = None) -> HTMLResponse:
     try:
-        query = "SELECT * FROM View_Offre;"
-        data = await database.fetch_all(query=query)
+        if idcandidat is None:
+            query = "SELECT * FROM View_Offre;"
+            data = await database.fetch_all(query=query)
+        else:
+            query = "SELECT * FROM View_Offre INNER JOIN Candidat_Offre ON View_Offre.id = Candidat_Offre.idoffre WHERE Candidat_Offre.idcandidat = :idcandidat;"
+            data = await database.fetch_all(
+                query=query, values=dict(idcandidat=idcandidat)
+            )
+
         return templates.TemplateResponse(
             request=request, name="offres.html", context=dict(offres=data)
         )
@@ -29,10 +36,31 @@ async def get_offres(request: Request) -> HTMLResponse:
 @router.get("/offres/{id}", tags=["offres"])
 async def get_offres_detail(request: Request, id: int) -> HTMLResponse:
     try:
-        query = "SELECT * FROM View_Offre WHERE id = :id;"
-        data = await database.fetch_one(query=query, values=dict(id=id))
+        query_offre = "SELECT * FROM View_Offre WHERE id = :id;"
+        query_offre_candidats = """SELECT * FROM Candidat_Offre co
+        INNER JOIN View_Candidat c ON co.idcandidat = c.id
+        WHERE co.idoffre = :id;
+        """
+        async with database.transaction():
+            offre = await database.fetch_one(query=query_offre, values=dict(id=id))
+            candidats = await database.fetch_all(
+                query=query_offre_candidats, values=dict(id=id)
+            )
+
+        if offre is None:
+            # TODO: Return Not found
+            return templates.TemplateResponse(
+                request=request,
+                name="error.html",
+                context=dict(error="Offre not found"),
+            )
+
+        data = dict(
+            offre=dict(offre),
+            candidats=[dict(record) for record in candidats],
+        )
         return templates.TemplateResponse(
-            request=request, name="offre.html", context=dict(offre=dict(data))
+            request=request, name="offre.html", context=dict(data=data)
         )
 
     except PostgresError as e:
