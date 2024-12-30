@@ -11,7 +11,7 @@ from models import OffreCreate
 from routes import router
 
 @router.get("/offres", tags=["offres"])
-async def get_offres(request: Request, idCandidat: int | None = None, statut: str = "all") -> HTMLResponse:
+async def get_offres(request: Request, idCandidat: int | None = None, statut: str = "all", datePublication: str = "") -> HTMLResponse:
     try:
         # Base query to select from View_Offre
         base_query = "SELECT * FROM View_Offre"
@@ -30,8 +30,16 @@ async def get_offres(request: Request, idCandidat: int | None = None, statut: st
             else:
                 filters.append(f"WHERE View_Offre.{status_condition}")
 
-        # Combine the base query with filters
-        query = f"{base_query} {' '.join(filters)}"
+        # If datePublication filter is applied, modify the query to include ordering
+        if datePublication == "recent":
+            order_by = "ORDER BY datepublication DESC"  # Most recent first
+        elif datePublication == "oldest":
+            order_by = "ORDER BY datepublication ASC"  # Oldest first
+        else:
+            order_by = ""  # Default, no ordering if no filter provided
+
+        # Combine the base query with filters and ordering
+        query = f"{base_query} {' '.join(filters)} {order_by}"
 
         # Fetch the data from the database
         data = await database.fetch_all(query=query, values=dict(idCandidat=idCandidat) if idCandidat else {})
@@ -39,15 +47,13 @@ async def get_offres(request: Request, idCandidat: int | None = None, statut: st
         return templates.TemplateResponse(
             request=request, 
             name="offres.html", 
-            context=dict(offres=data, idCandidat=idCandidat, statut=statut)
+            context=dict(offres=data, idCandidat=idCandidat, statut=statut, datePublication=datePublication)
         )
 
     except PostgresError as e:
         return templates.TemplateResponse(
             request=request, name="error.html", context=dict(error=str(e))
         )
-
-
 
 
 @router.get("/offres/{id}", tags=["offres"])

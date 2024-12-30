@@ -7,8 +7,13 @@
   function submitForm() {
     const form = document.getElementById("filterForm");
     const urlParams = new URLSearchParams(window.location.search);
+
     const statut = document.getElementById("statut").value;
+    const datePublication = document.getElementById("datePublication").value;
+
     urlParams.set("statut", statut);
+    urlParams.set("datePublication", datePublication);
+
     const newUrl = "/offres?" + urlParams.toString();  
     window.location = newUrl; 
   }
@@ -16,18 +21,30 @@
 
 <div class="filter-box">
   <label>Filtres</label>
-  
-<form method="get" action="/offres" id="filterForm">
-  <div class="filter-item">
-  <select name="statut" id="statut" onchange="submitForm()">
-    <option value="all" {% if statut == "all" %}selected{% endif %}>Toutes les offres</option>
-    <option value="open" {% if statut == "open" %}selected{% endif %}>Offres ouvertes uniquement</option>
-    <option value="closed" {% if statut == "closed" %}selected{% endif %}>Offres closes uniquement</option>
-  </select>
-  </div>
 
-  <noscript><button type="submit">Appliquer</button></noscript>
-</form>
+  <form method="get" action="/offres" id="filterForm">
+    <div class="filter-item">
+      <label for="statut">Tri par statut</label>
+      <select name="statut" id="statut" onchange="submitForm()">
+        <option value="all" {% if statut == "all" %}selected{% endif %}>Toutes les offres</option>
+        <option value="open" {% if statut == "open" %}selected{% endif %}>Offres ouvertes uniquement</option>
+        <option value="closed" {% if statut == "closed" %}selected{% endif %}>Offres closes uniquement</option>
+      </select>
+    </div>
+
+    <div class="filter-item">
+      <label for="datePublication">Tri par date de publication</label>
+      <select name="datePublication" id="datePublication" onchange="submitForm()">
+        <option value="" {% if datePublication == "" %}selected{% endif %} disabled>--</option>
+        <option value="recent" {% if datePublication == "recent" %}selected{% endif %}>Plus récentes d'abord</option>
+        <option value="oldest" {% if datePublication == "oldest" %}selected{% endif %}>Plus anciennes d'abord</option>
+      </select>
+    </div>
+
+    <noscript><button type="submit">Appliquer</button></noscript>
+  </form>
+</div>
+
 
 </div>
 

@@ -899,16 +899,15 @@ sub {
 
 .filter-box {
   position: relative;
-  padding: 1.5rem;
-  margin-bottom: 3rem;
-  margin-top: 3rem;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  margin-top: 2rem;
   background-color: var(--accent-bg);
   border: 1px solid var(--border);
   border-radius: var(--standard-border-radius);
   display: flex;
   flex-wrap: wrap;
-  gap: 1.5rem;
-  align-items: center;
+  gap: 1rem;
 }
 
 .filter-box label {
@@ -935,34 +934,43 @@ sub {
   background-color: var(--border);
 }
 
-.filter-box input[type="text"],
-.filter-box select,
-.filter-box button {
-  padding: 0.5rem 1rem;
-  border-radius: var(--standard-border-radius);
-  border: 1px solid var(--border);
-  background-color: var(--bg);
-  font-size: 1rem;
+/* Styling for each filter-item */
+.filter-item {
+  position: relative;
+  width: 200px; /* Adjust this width as needed */
+  margin-top: 0.8rem;
+}
+
+/* Label positioning on top of select */
+.filter-item label {
+  font-size: 0.7rem; /* Adjusted font size */
   color: var(--text);
-  transition: background-color 100ms ease-in-out, border-color 100ms ease-in-out;
+  position: absolute;
+  top: -0.5rem; /* Adjusted to make space for smaller font */
+  left: 0.8rem; /* Adjust for left margin */
+  background-color: var(--accent-bg); /* Match background color */
+  padding: 0.2rem 0.5rem; /* Add padding to create spacing between the label and the border */
+  line-height: 1; /* Ensure the label aligns properly above the select */
 }
 
-.filter-box input[type="text"]:focus,
-.filter-box select:focus,
-.filter-box button:hover {
-  background-color: var(--accent-light);
-  border-color: var(--accent);
+/* Styling for the select dropdown */
+.filter-item select {
+  padding: 1rem;
+  font-size: 1rem;
+  background-color: var(--accent-bg); /* Match background color with filter-box */
+  border: 1px solid var(--border);
+  border-radius: var(--standard-border-radius);
+  width: 100%; /* Ensure select takes up the full width of the container */
+  height: auto;
+  appearance: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box; /* Ensures padding doesn't affect the width */
+  padding-top: 0.8rem; /* Adjusted for smaller label size */
 }
 
-.filter-box button {
-  background-color: var(--accent);
-  color: var(--accent-text);
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.filter-box button:hover {
-  background-color: var(--accent-hover);
+/* Optional: Styling for when select is focused */
+.filter-item select:focus {
+  border-color: var(--accent-color); /* Change the border color on focus */
 }
 
 @media only screen and (max-width: 720px) {
