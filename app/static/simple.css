@@ -894,3 +894,108 @@ sub {
     white-space: pre-wrap;
   }
 }
+
+/* Filter box customization */
+
+.filter-box {
+  position: relative;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  margin-top: 2rem;
+  background-color: var(--accent-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--standard-border-radius);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.filter-box label {
+  position: absolute;
+  top: -1rem; 
+  left: 1.2rem; 
+  background-color: var(--accent-bg);
+  font-size: 1.1rem; 
+  color: var(--text);
+  font-weight: bold;
+  padding: 0 0.7rem; 
+  z-index: 1;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.filter-box label::after {
+  content: "";
+  position: absolute;
+  bottom: -0.3rem;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background-color: var(--border);
+}
+
+/* Styling for each filter-item */
+.filter-item {
+  position: relative;
+  width: 200px; /* Adjust this width as needed */
+  margin-top: 0.8rem;
+}
+
+/* Label positioning on top of select */
+.filter-item label {
+  font-size: 0.7rem; /* Adjusted font size */
+  color: var(--text);
+  position: absolute;
+  top: -0.5rem; /* Adjusted to make space for smaller font */
+  left: 0.8rem; /* Adjust for left margin */
+  background-color: var(--accent-bg); /* Match background color */
+  padding: 0.2rem 0.5rem; /* Add padding to create spacing between the label and the border */
+  line-height: 1; /* Ensure the label aligns properly above the select */
+}
+
+/* Styling for the select dropdown */
+.filter-item select {
+  padding: 1rem;
+  font-size: 1rem;
+  background-color: var(--accent-bg); /* Match background color with filter-box */
+  border: 1px solid var(--border);
+  border-radius: var(--standard-border-radius);
+  width: 100%; /* Ensure select takes up the full width of the container */
+  height: auto;
+  appearance: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box; /* Ensures padding doesn't affect the width */
+  padding-top: 0.8rem; /* Adjusted for smaller label size */
+}
+
+/* Optional: Styling for when select is focused */
+.filter-item select:focus {
+  border-color: var(--accent-color); /* Change the border color on focus */
+}
+
+.gender-filter {
+  border: 1px solid var(--border);
+  border-radius: var(--standard-border-radius); /* Optional, if you want rounded corners */
+  padding: 0.5rem; /* Optional, to add space inside the border */
+  padding-top: 1rem;
+  margin-top: 0.5rem;
+  width: 120%;
+}
+
+input[type="checkbox"] + label,
+input[type="radio"] + label {
+  display: inline-block; /* Ensures label is aligned horizontally with checkbox */
+  vertical-align: middle; /* Aligns the label and checkbox */
+  margin-left: 0.5rem; /* Optional: adds space between the checkbox and the label */
+}
+
+@media only screen and (max-width: 720px) {
+  input[type="checkbox"] + label,
+  input[type="radio"] + label {
+    margin-left: 0.8rem;
+  }
+  .filter-box {
+    flex-direction: column;
+    width: 100%;
+  }
+}

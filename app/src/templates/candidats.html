@@ -2,6 +2,50 @@
 
 {% block content %}
 <h1>Candidats</h1>
+
+<script>
+  // Function to submit the form when a checkbox is changed
+  function submitForm() {
+    const form = document.getElementById('filterForm');
+    form.submit();
+  }
+
+  // Function to keep the checkboxes checked based on the URL query parameters
+  window.onload = function() {
+    // Get the URL query parameters
+    const params = new URLSearchParams(window.location.search);
+
+    // Loop through each checkbox and check if its value exists in the URL params
+    const checkboxes = document.querySelectorAll('.gender-filter input[type="checkbox"]');
+    checkboxes.forEach(function(checkbox) {
+      // Check if the checkbox value is in the query string, and set it to checked if true
+      if (params.has('gender') && params.getAll('gender').includes(checkbox.value)) {
+        checkbox.checked = true;
+      } else {
+        checkbox.checked = false;
+      }
+    });
+  };
+</script>
+
+
+
+<div class="filter-box">
+  <label>Filtres</label>
+
+  <form method="get" action="/candidats" id="filterForm">
+    <div class="filter-item gender-filter">
+      <label for="gender">Genres</label>
+      <input type="checkbox" name="gender" value="Homme" id="genderHomme" onchange="submitForm()"> Homme<br>
+      <input type="checkbox" name="gender" value="Femme" id="genderFemme" onchange="submitForm()"> Femme<br>  
+      <input type="checkbox" name="gender" value="Autre" id="genderAutre" onchange="submitForm()"> Autre
+    </div>
+
+    <noscript><button type="submit">Appliquer</button></noscript>
+  </form>
+</div>
+
+
 <figure>
   <table>
     <thead>

@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from asyncpg import PostgresError
-from fastapi import Form, Request
+from fastapi import Form, Request, Query
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from config import templates
@@ -9,30 +9,49 @@ from db import database
 from models import CandidatCreate
 from routes import router
 
-
 @router.get("/")
 async def home(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(request=request, name="base.html")
 
 
 @router.get("/candidats", tags=["candidats"])
-async def get_candidats(request: Request, idoffre: int | None = None) -> HTMLResponse:
+async def get_candidats(request: Request, idoffre: int | None = None, gender: list[str] = Query([], alias="gender")) -> HTMLResponse:
     try:
-        if idoffre is None:
-            query = "SELECT * FROM View_Candidat;"
-            data = await database.fetch_all(query=query)
-        else:
-            query = "SELECT * FROM View_Candidat INNER JOIN Candidat_Offre ON View_Candidat.id = Candidat_Offre.idcandidat WHERE Candidat_Offre.idoffre = :idoffre;"
-            data = await database.fetch_all(query=query, values=dict(idoffre=idoffre))
+        base_query = "SELECT * FROM View_Candidat"
+        filters = []
+
+        # If idoffre is provided, apply the filter for idoffre
+        if idoffre is not None:
+            filters.append("INNER JOIN Candidat_Offre ON View_Candidat.id = Candidat_Offre.idcandidat")
+            filters.append(f"WHERE Candidat_Offre.idoffre = :idoffre")
+        
+        # If gender is provided, apply the gender filter
+        if gender:
+            gender_condition = " OR ".join([f"View_Candidat.genre = '{g}'" for g in gender])
+            if filters:
+                filters.append(f"AND ({gender_condition})")
+            else:
+                filters.append(f"WHERE ({gender_condition})")
+
+        # Combine the base query with filters
+        query = f"{base_query} {' '.join(filters)}"
+
+        # Fetch the data from the database
+        data = await database.fetch_all(query=query, values=dict(idoffre=idoffre) if idoffre else {})
+
+        # Convert to dictionary format
         data = [dict(record) for record in data]
+
+        # Return the template with the filtered data and gender filter state
         return templates.TemplateResponse(
-            request=request, name="candidats.html", context=dict(candidats=data)
+            request=request, name="candidats.html", context=dict(candidats=data, gender=gender)
         )
 
     except PostgresError as e:
         return templates.TemplateResponse(
             request=request, name="error.html", context=dict(error=str(e))
         )
+
 
 
 @router.get("/candidats/{id}", tags=["candidats"])
