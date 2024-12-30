@@ -894,3 +894,80 @@ sub {
     white-space: pre-wrap;
   }
 }
+
+/* Filter box customization */
+
+.filter-box {
+  position: relative;
+  padding: 1.5rem;
+  margin-bottom: 3rem;
+  margin-top: 3rem;
+  background-color: var(--accent-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--standard-border-radius);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.filter-box label {
+  position: absolute;
+  top: -1rem; 
+  left: 1.2rem; 
+  background-color: var(--accent-bg);
+  font-size: 1.1rem; 
+  color: var(--text);
+  font-weight: bold;
+  padding: 0 0.7rem; 
+  z-index: 1;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.filter-box label::after {
+  content: "";
+  position: absolute;
+  bottom: -0.3rem;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background-color: var(--border);
+}
+
+.filter-box input[type="text"],
+.filter-box select,
+.filter-box button {
+  padding: 0.5rem 1rem;
+  border-radius: var(--standard-border-radius);
+  border: 1px solid var(--border);
+  background-color: var(--bg);
+  font-size: 1rem;
+  color: var(--text);
+  transition: background-color 100ms ease-in-out, border-color 100ms ease-in-out;
+}
+
+.filter-box input[type="text"]:focus,
+.filter-box select:focus,
+.filter-box button:hover {
+  background-color: var(--accent-light);
+  border-color: var(--accent);
+}
+
+.filter-box button {
+  background-color: var(--accent);
+  color: var(--accent-text);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filter-box button:hover {
+  background-color: var(--accent-hover);
+}
+
+@media only screen and (max-width: 720px) {
+  .filter-box {
+    flex-direction: column;
+    width: 100%;
+  }
+}

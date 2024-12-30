@@ -10,21 +10,36 @@ from db import database
 from models import OffreCreate
 from routes import router
 
-
 @router.get("/offres", tags=["offres"])
-async def get_offres(request: Request, idcandidat: int | None = None) -> HTMLResponse:
+async def get_offres(request: Request, idCandidat: int | None = None, statut: str = "all") -> HTMLResponse:
     try:
-        if idcandidat is None:
-            query = "SELECT * FROM View_Offre;"
-            data = await database.fetch_all(query=query)
-        else:
-            query = "SELECT * FROM View_Offre INNER JOIN Candidat_Offre ON View_Offre.id = Candidat_Offre.idoffre WHERE Candidat_Offre.idcandidat = :idcandidat;"
-            data = await database.fetch_all(
-                query=query, values=dict(idcandidat=idcandidat)
-            )
+        # Base query to select from View_Offre
+        base_query = "SELECT * FROM View_Offre"
+        filters = []
+
+        # If idCandidat is provided, add the join and filter for idCandidat
+        if idCandidat is not None:
+            filters.append(f"INNER JOIN Candidat_Offre ON View_Offre.id = Candidat_Offre.idoffre")
+            filters.append(f"WHERE Candidat_Offre.idCandidat = :idCandidat")
+
+        # If statut is provided (open or closed), apply the corresponding filter
+        if statut != "all":
+            status_condition = "datecloture IS NULL" if statut == "open" else "datecloture IS NOT NULL"
+            if filters:
+                filters.append(f"AND View_Offre.{status_condition}")
+            else:
+                filters.append(f"WHERE View_Offre.{status_condition}")
+
+        # Combine the base query with filters
+        query = f"{base_query} {' '.join(filters)}"
+
+        # Fetch the data from the database
+        data = await database.fetch_all(query=query, values=dict(idCandidat=idCandidat) if idCandidat else {})
 
         return templates.TemplateResponse(
-            request=request, name="offres.html", context=dict(offres=data)
+            request=request, 
+            name="offres.html", 
+            context=dict(offres=data, idCandidat=idCandidat, statut=statut)
         )
 
     except PostgresError as e:
@@ -33,12 +48,14 @@ async def get_offres(request: Request, idcandidat: int | None = None) -> HTMLRes
         )
 
 
+
+
 @router.get("/offres/{id}", tags=["offres"])
 async def get_offres_detail(request: Request, id: int) -> HTMLResponse:
     try:
         query_offre = "SELECT * FROM View_Offre WHERE id = :id;"
         query_offre_candidats = """SELECT * FROM Candidat_Offre co
-        INNER JOIN View_Candidat c ON co.idcandidat = c.id
+        INNER JOIN View_Candidat c ON co.idCandidat = c.id
         WHERE co.idoffre = :id;
         """
         async with database.transaction():
