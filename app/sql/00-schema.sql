@@ -60,7 +60,7 @@ CREATE TABLE Candidat (
     idPersonne INTEGER,
     age SMALLINT NOT NULL,
     genre Genre NOT NULL,
-    numeroTel VARCHAR(15) NOT NULL UNIQUE,
+    numeroTel VARCHAR(20) NOT NULL UNIQUE,
     anneesExp SMALLINT NOT NULL,
     idAdresse INTEGER NOT NULL UNIQUE,
     CONSTRAINT PK_Candidat PRIMARY KEY(idPersonne),
@@ -327,7 +327,7 @@ EXECUTE FUNCTION check_candidat_offre_constraints();
 
 CREATE TABLE Domaine (
     id serial,
-    nom VARCHAR(255) NOT NULL,
+    nom VARCHAR(255) UNIQUE NOT NULL,
     CONSTRAINT PK_Domaine PRIMARY KEY(id)
 );
 
@@ -382,116 +382,3 @@ CREATE TABLE Candidat_Domaine (
     CONSTRAINT FK_Domaine FOREIGN KEY (idDomaine) REFERENCES Domaine(id) ON DELETE RESTRICT ON UPDATE NO ACTION
 );
 
-
--- Adresse 
--- 1
-INSERT INTO Adresse (latitude, longitude, rue, ville, npa, pays) 
-VALUES (46.9481, 7.4474, 'Bundesplatz 1', 'Berne', '3011', 'Suisse');
--- 2
-INSERT INTO Adresse (latitude, longitude, rue, ville, npa, pays) 
-VALUES (46.2044, 6.1432, 'Rue de la Confédération 8', 'Genève', '1204', 'Suisse');
--- 3
-INSERT INTO Adresse (latitude, longitude, rue, ville, npa, pays) 
-VALUES (47.3769, 8.5417, 'Bahnhofstrasse 25', 'Zurich', '8001', 'Suisse');
--- 4
-INSERT INTO Adresse (latitude, longitude, rue, ville, npa, pays) 
-VALUES (46.5197, 6.6323, 'Avenue d’Ouchy 15', 'Lausanne', '1006', 'Suisse');
--- 5
-INSERT INTO Adresse (latitude, longitude, rue, ville, npa, pays) 
-VALUES (46.8025, 7.1517, 'Rue de Morat 10', 'Fribourg', '1700', 'Suisse');
-
-BEGIN;
--- Domaine
--- 1
-INSERT INTO Domaine (nom) VALUES ('Developpement informatique');
--- 2
-INSERT INTO Domaine (nom) VALUES ('Finance');
-
--- Offre
--- 1
-INSERT INTO Offre (idAdresse, descriptionOffre, nomPoste, anneesExpRequises, datePublication, dateCloture)
-VALUES (4, 'Conseiller financier spécialisé en investissements', 'Conseiller financier', 5, '2024-06-01', NULL);
--- 2
-INSERT INTO Offre (idAdresse, descriptionOffre, nomPoste, anneesExpRequises, datePublication, dateCloture)
-VALUES (5, 'Développeur Full Stack avec expérience en technologies modernes.', 'Développeur Full Stack', 3, '2024-01-10', NULL);
-
--- Offre_Domaine
-INSERT INTO Offre_Domaine (idOffre, idDomaine, diplomeRecherche) VALUES (1, 2, 'Bachelor');
-INSERT INTO Offre_Domaine (idOffre, idDomaine, diplomeRecherche) VALUES (2, 1, 'Master');
-COMMIT;
-
--- Candidats
--- 1
-BEGIN;
-INSERT INTO Personne (nom, prenom, email) VALUES ('Dupont', 'Jacques', 'jacques.dupont@gmail.com');
-INSERT INTO Candidat (idPersonne, age, genre, numeroTel, anneesExp, idAdresse) VALUES ((SELECT MAX(id) FROM Personne), 30, 'Homme', '0791234567', 7, 1);
-COMMIT;
--- 2
-BEGIN;
-INSERT INTO Personne (nom, prenom, email) VALUES ('Martin', 'Sophie', 'sophie.martin@gmail.com');
-INSERT INTO Candidat (idPersonne, age, genre, numeroTel, anneesExp, idAdresse) VALUES ((SELECT MAX(id) FROM Personne), 28, 'Femme', '0791230123', 4, 2);
-COMMIT;
--- 3
-BEGIN;
-INSERT INTO Personne (nom, prenom, email) VALUES ('Lemoine', 'Paul', 'paul.lemoine@yahoo.fr');
-INSERT INTO Candidat (idPersonne, age, genre, numeroTel, anneesExp, idAdresse) VALUES ((SELECT MAX(id) FROM Personne), 35, 'Homme', '0799876543', 10, 3);
-COMMIT;
-
--- Candidat_Domaine
-INSERT INTO Candidat_Domaine (idCandidat, idDomaine, diplomePossede) VALUES (1, 1, 'Master');
-INSERT INTO Candidat_Domaine (idCandidat, idDomaine, diplomePossede) VALUES (2, 1, 'Bachelor');
-INSERT INTO Candidat_Domaine (idCandidat, idDomaine, diplomePossede) VALUES (3, 2, 'Master');
-
--- Candidat_Offre
-INSERT INTO Candidat_Offre (idCandidat, idOffre, datePostulation, statut) VALUES (1, 2, '2024-02-01', 'En cours');
-INSERT INTO Candidat_Offre (idCandidat, idOffre, datePostulation, statut) VALUES (2, 2, '2024-03-01', 'En attente');
-INSERT INTO Candidat_Offre (idCandidat, idOffre, datePostulation, statut) VALUES (3, 1, '2024-07-01', 'En cours');
-
--- Recruteurs
--- 4
-BEGIN;
-INSERT INTO Personne (nom, prenom, email) VALUES ('Durand', 'Claire', 'claire.durand@outlook.com');
-INSERT INTO Recruteur (idPersonne) VALUES ((SELECT MAX(id) FROM Personne));
-COMMIT;
--- 5
-BEGIN;
-INSERT INTO Personne (nom, prenom, email) VALUES ('Bernard', 'Lucas', 'lucas.bernard@hotmail.com');
-INSERT INTO Recruteur (idPersonne) VALUES ((SELECT MAX(id) FROM Personne));
-COMMIT;
-
--- Recruteur_Candidat
-INSERT INTO Recruteur_Candidat (idRecruteur, idCandidat) VALUES (4,1);
-INSERT INTO Recruteur_Candidat (idRecruteur, idCandidat) VALUES (5,3);
-
--- Interaction
-
--- Interaction_Email
--- 1
-BEGIN;
-INSERT INTO Interaction (dateInteraction, notesTexte) VALUES ('2024-04-01', 'Entretien la semaine prochaine.');
-INSERT INTO Interaction_Email (idInteraction, objet) VALUES ((SELECT MAX(id) FROM Interaction), 'Confirmation rendez-vous.');
-COMMIT;
-
--- Interaction_Appel
--- 2 
-BEGIN;
-INSERT INTO Interaction (dateInteraction, notesTexte) VALUES ('2024-07-10', 'Demande de détails sur le poste.');
-INSERT INTO Interaction_Appel (idInteraction, duree) VALUES ((SELECT MAX(id) FROM Interaction), '00:15:00');
-COMMIT;
-
--- Interaction_Entretien
--- 3
-BEGIN;
-INSERT INTO Interaction (dateInteraction, notesTexte) VALUES ('2024-04-08', 'Entretien réussi, recontacter pour la phase suivante.');
-INSERT INTO Interaction_Entretien (idInteraction, typeEntretien, duree) VALUES ((SELECT MAX(id) FROM Interaction), 'Technique', '00:45:00');
-COMMIT;
-
--- Recruteur_Interaction
-INSERT INTO Recruteur_Interaction (idRecruteur, idInteraction) VALUES (4,1);
-INSERT INTO Recruteur_Interaction (idRecruteur, idInteraction) VALUES (4,3);
-INSERT INTO Recruteur_Interaction (idRecruteur, idInteraction) VALUES (5,2);
-
--- Candidat_Interaction
-INSERT INTO Candidat_Interaction (idCandidat, idInteraction) VALUES (1,1);
-INSERT INTO Candidat_Interaction (idCandidat, idInteraction) VALUES (1,3);
-INSERT INTO Candidat_Interaction (idCandidat, idInteraction) VALUES (3,2);
