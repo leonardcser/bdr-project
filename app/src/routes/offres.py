@@ -34,20 +34,13 @@ async def get_offres(request: Request, idcandidat: int | None = None) -> HTMLRes
 
 
 @router.get("/offres/{id}", tags=["offres"])
-async def get_offres_detail(request: Request, id: int, pertinence_sort: bool = False) -> HTMLResponse:
+async def get_offres_detail(request: Request, id: int) -> HTMLResponse:
     try:
-        if pertinence_sort:
-            query_offre = "SELECT * FROM View_Offre WHERE id = :id;"
-            query_offre_candidats = """SELECT * FROM Candidat_Offre co
-            INNER JOIN View_Candidat c ON co.idcandidat = c.id
-            WHERE co.idoffre = :id;
-            """
-        else:
-            query_offre = "SELECT * FROM View_Offre WHERE id = :id;"
-            query_offre_candidats = """SELECT * FROM Candidat_Offre co
-            INNER JOIN View_Candidat c ON co.idcandidat = c.id
-            WHERE co.idoffre = :id;
-            """
+        query_offre = "SELECT * FROM View_Offre WHERE id = :id;"
+        query_offre_candidats = """SELECT * FROM Candidat_Offre co
+        INNER JOIN View_Candidat c ON co.idcandidat = c.id
+        WHERE co.idoffre = :id;
+        """
         async with database.transaction():
             offre = await database.fetch_one(query=query_offre, values=dict(id=id))
             candidats = await database.fetch_all(

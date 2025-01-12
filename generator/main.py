@@ -146,7 +146,8 @@ class DataGenerator:
 
             date_cloture = (
                 fake.date_between_dates(
-                    date_start=date_publication + timedelta(days=30),
+                    date_start=date_publication
+                    + timedelta(days=30),  # Minimum 30 days after publication
                     date_end=max_closure_date,
                 )
                 if random.choice([True, False])
@@ -165,20 +166,23 @@ class DataGenerator:
                 )
             )
 
-        # Generate candidatures
+        # Generate candidatures with multiple applications per candidate
         statuses = ["En attente", "En cours", "Refusé"]
         candidat_ids = list(
             range(NUM_RECRUTEURS + 1, NUM_RECRUTEURS + NUM_CANDIDATS + 1)
         )
         offre_ids = list(range(1, NUM_OFFRES + 1))
+        # Create a set to track unique candidate-offer pairs
         used_pairs = set()
-
+        # For each candidate, generate multiple applications
         for candidat_id in candidat_ids:
+            # Randomly select offers for this candidate
             available_offers = random.sample(
                 offre_ids, min(APPLICATIONS_PER_CANDIDATE, len(offre_ids))
             )
 
             for offre_id in available_offers:
+                # Skip if this pair has already been used
                 if (candidat_id, offre_id) in used_pairs:
                     continue
 
