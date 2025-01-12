@@ -209,3 +209,28 @@ async def close_offres(request: Request, id: int):
             name="error.html",
             context=dict(error=str(e)),
         )
+
+@router.get("/offres/{idoffre}/pertinence", tags=["offres"])
+async def get_candidats_pertinence(request: Request, idoffre: int) -> HTMLResponse:
+    try:
+        query = """
+        SELECT cs.idCandidat, cs.score, c.nom, c.prenom, c.email, c.age, c.genre, c.numerotel, c.anneesExp
+        FROM get_candidats_pertinents(:idoffre) cs
+        JOIN View_Candidat c ON cs.idCandidat = c.id
+        ORDER BY cs.score DESC;
+        """
+        candidats = await database.fetch_all(query, values={"idoffre": idoffre})
+        
+        query_offre = "SELECT * FROM View_Offre WHERE id = :idoffre;"
+        offre = await database.fetch_one(query_offre, values={"idoffre": idoffre})
+        
+        return templates.TemplateResponse(
+            "offre-pertinence.html",
+            {"request": request, "offre": dict(offre), "candidats": [dict(c) for c in candidats]},
+        )
+    except PostgresError as e:
+        return templates.TemplateResponse(
+            request=request,
+            name="error.html",
+            context=dict(error=str(e)),
+        )

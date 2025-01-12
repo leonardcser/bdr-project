@@ -210,3 +210,28 @@ async def put_candidats(
             name="candidat-update.html",
             context=dict(method="put", candidat=data, error=str(e)),
         )
+
+@router.get("/candidats/{idcandidat}/pertinence", tags=["candidats"])
+async def get_offres_pertinence(request: Request, idcandidat: int) -> HTMLResponse:
+    try:
+        query = """
+        SELECT cs.idOffre, cs.score
+        FROM get_offres_pertinentes(:idcandidat) cs
+        JOIN View_Offre c ON cs.idOffre = c.id
+        ORDER BY cs.score DESC;
+        """
+        offres = await database.fetch_all(query, values={"idcandidat": idcandidat})
+        
+        query_candidat = "SELECT * FROM View_Candidat WHERE id = :idcandidat;"
+        candidat = await database.fetch_one(query_candidat, values={"idcandidat": idcandidat})
+        
+        return templates.TemplateResponse(
+            "candidat-pertinence.html",
+            {"request": request, "candidat": dict(candidat), "offres": [dict(c) for c in offres]},
+        )
+    except PostgresError as e:
+        return templates.TemplateResponse(
+            request=request,
+            name="error.html",
+            context=dict(error=str(e)),
+        )
