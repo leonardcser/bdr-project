@@ -146,8 +146,7 @@ class DataGenerator:
 
             date_cloture = (
                 fake.date_between_dates(
-                    date_start=date_publication
-                    + timedelta(days=30),  # Minimum 30 days after publication
+                    date_start=date_publication + timedelta(days=30),
                     date_end=max_closure_date,
                 )
                 if random.choice([True, False])
@@ -166,24 +165,20 @@ class DataGenerator:
                 )
             )
 
-        # Generate candidatures with multiple applications per candidate
+        # Generate candidatures
         statuses = ["En attente", "En cours", "Refusé"]
         candidat_ids = list(
             range(NUM_RECRUTEURS + 1, NUM_RECRUTEURS + NUM_CANDIDATS + 1)
         )
         offre_ids = list(range(1, NUM_OFFRES + 1))
-        # Create a set to track unique candidate-offer pairs
         used_pairs = set()
 
-        # For each candidate, generate multiple applications
         for candidat_id in candidat_ids:
-            # Randomly select offers for this candidate
             available_offers = random.sample(
                 offre_ids, min(APPLICATIONS_PER_CANDIDATE, len(offre_ids))
             )
 
             for offre_id in available_offers:
-                # Skip if this pair has already been used
                 if (candidat_id, offre_id) in used_pairs:
                     continue
 
@@ -227,6 +222,15 @@ COMMIT;"""
         # Insert candidats
         for i, candidat in enumerate(self.candidats):
             candidat_id = NUM_RECRUTEURS + i + 1
+            insert_domaines_for_candidat = []
+            for domain_id, diploma in candidat.domaines:
+                insert_domaines_for_candidat.append(
+                    f"INSERT INTO Domaine (id, nom) VALUES ({domain_id}, '{DOMAINES[domain_id - 1]}') ON CONFLICT (nom) DO NOTHING;"
+                )
+                insert_domaines_for_candidat.append(
+                    f"INSERT INTO Candidat_Domaine (idCandidat, idDomaine, diplomePossede) VALUES ({candidat_id}, {domain_id}, '{diploma}');"
+                )
+
             sql = f"""-- candidat
 BEGIN;
 INSERT INTO Adresse (latitude, longitude, rue, ville, npa, pays)
@@ -237,20 +241,26 @@ VALUES ('{candidat.nom}', '{candidat.prenom}', '{candidat.email}');
 INSERT INTO Candidat (idPersonne, age, genre, numeroTel, anneesExp, idAdresse)
 VALUES ((SELECT MAX(id) FROM Personne), {candidat.age}, '{candidat.genre}',
         '{candidat.numerotel}', {candidat.anneesexp}, (SELECT MAX(id) FROM Adresse));
-{chr(10).join(f"INSERT INTO Domaine (id, nom) VALUES ({domain_id}, '{DOMAINES[domain_id - 1]}') ON CONFLICT (nom) DO NOTHING;"
-              for domain_id, _ in candidat.domaines)}
-{chr(10).join(f"INSERT INTO Candidat_Domaine (idCandidat, idDomaine, diplomePossede) VALUES ({candidat_id}, {domain_id}, '{diploma}');"
-              for domain_id, diploma in candidat.domaines)}
+{chr(10).join(insert_domaines_for_candidat)}
 COMMIT;"""
             sql_commands.append(sql)
 
         # Insert offres
-        for offre in self.offres:
+        for i, offre in enumerate(self.offres):
+            offre_id = i + 1
             date_cloture = (
-                "NULL"
-                if offre.date_cloture is None
-                else f"'{offre.date_cloture.isoformat()}'"
+                "NULL" if offre.date_cloture is None else f"'{offre.date_cloture.isoformat()}'"
             )
+
+            insert_domaines_for_offre = []
+            for domain_id, diploma_required in offre.domaines:
+                insert_domaines_for_offre.append(
+                    f"INSERT INTO Domaine (id, nom) VALUES ({domain_id}, '{DOMAINES[domain_id - 1]}') ON CONFLICT (nom) DO NOTHING;"
+                )
+                insert_domaines_for_offre.append(
+                    f"INSERT INTO Offre_Domaine (idOffre, idDomaine, diplomeRecherche) VALUES ({offre_id}, {domain_id}, '{diploma_required}');"
+                )
+
             sql = f"""-- offre
 BEGIN;
 INSERT INTO Adresse (latitude, longitude, rue, ville, npa, pays)
@@ -259,6 +269,7 @@ VALUES ({offre.adresse.latitude}, {offre.adresse.longitude}, '{offre.adresse.rue
 INSERT INTO Offre (idAdresse, descriptionOffre, nomPoste, anneesExpRequises, datePublication, dateCloture)
 VALUES ((SELECT MAX(id) FROM Adresse), '{offre.descriptionoffre}', '{offre.nomposte}',
         {offre.anneesexprequises}, '{offre.date_publication.isoformat()}', {date_cloture});
+{chr(10).join(insert_domaines_for_offre)}
 COMMIT;"""
             sql_commands.append(sql)
 
@@ -274,12 +285,10 @@ COMMIT;"""
 
         return "\n\n".join(sql_commands)
 
-
 def main():
     generator = DataGenerator()
     generator.generate_data()
     print(generator.generate_sql())
-
 
 if __name__ == "__main__":
     main()

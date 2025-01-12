@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Pertinence des offres pour le candidat {{ candidat.id }}</h1>
+<p>Nom : {{ candidat.nom }}</p>
+<p>Prénom : {{ candidat.prenom }}</p>
+<p>Email : {{ candidat.email }}</p>
+<p>Âge : {{ candidat.age }}</p>
+<p>Genre : {{ candidat.genre }}</p>
+<p>Numéro de téléphone : {{ candidat.numerotel }}</p>
+<p>Années d'expérience : {{ candidat.anneesexp }}</p>
+
+<figure>
+  <table>
+    <thead>
+      <tr>
+        <th>ID Offre</th>
+        <th>Poste</th>
+        <th>Description</th>
+        <th>Années d'expérience requises</th>
+        <th>Date de publication</th>
+        <th>Date de clôture</th>
+        <th>Score de pertinence</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for offre in offres %}
+      <tr>
+        <td>{{ offre.idoffre }}</td>
+        <td>{{ offre.nomposte }}</td>
+        <td>{{ offre.descriptionoffre }}</td>
+        <td>{{ offre.anneesexprequises }}</td>
+        <td>{{ offre.datepublication }}</td>
+        <td>{{ offre.datecloture|default('-', true) }}</td>
+        <td>{{ offre.score }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</figure>
+
+<a href="/candidats/{{ candidat.id }}">Retour au candidat</a>
+{% endblock %}
