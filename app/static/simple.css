@@ -924,6 +924,10 @@ sub {
   border-radius: 4px;
 }
 
+.filter-box .item label {
+  font-size: 0.7rem;
+}
+
 .filter-box label::after {
   content: "";
   position: absolute;

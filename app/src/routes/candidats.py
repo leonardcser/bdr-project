@@ -15,7 +15,13 @@ async def home(request: Request) -> HTMLResponse:
 
 
 @router.get("/candidats", tags=["candidats"])
-async def get_candidats(request: Request, idoffre: int | None = None, gender: list[str] = Query([], alias="gender")) -> HTMLResponse:
+async def get_candidats(
+    request: Request, 
+    idoffre: int | None = None, 
+    gender: list[str] = Query([], alias="gender"),
+    minAge: int | None = None,
+    maxAge: int | None = None,
+    ) -> HTMLResponse:
     try:
         base_query = "SELECT * FROM View_Candidat"
         filters = []
@@ -33,18 +39,43 @@ async def get_candidats(request: Request, idoffre: int | None = None, gender: li
             else:
                 filters.append(f"WHERE ({gender_condition})")
 
+        if minAge is not None or maxAge is not None:
+            age_conditions = []
+            if minAge > 0:
+                age_conditions.append(f"View_Candidat.age >= :minAge")
+            if maxAge is not None:
+                age_conditions.append(f"View_Candidat.age <= :maxAge")
+            
+            age_condition = " AND ".join(age_conditions)
+            if filters:
+                filters.append(f"AND ({age_condition})")
+            else:
+                filters.append(f"WHERE ({age_condition})")
+
         # Combine the base query with filters
         query = f"{base_query} {' '.join(filters)}"
 
+         # Fetch the data from the database
+        values = {}
+        if idoffre is not None:
+            values["idoffre"] = idoffre
+        if minAge is not None and minAge > 0:  # Only include if valid
+            values["minAge"] = minAge
+        if maxAge is not None:  # Include maxAge if set
+            values["maxAge"] = maxAge
+        print("Generated Query:", query)
+        print("Values:", values)
+
+
         # Fetch the data from the database
-        data = await database.fetch_all(query=query, values=dict(idoffre=idoffre) if idoffre else {})
+        data = await database.fetch_all(query=query, values=values)
 
         # Convert to dictionary format
         data = [dict(record) for record in data]
 
         # Return the template with the filtered data and gender filter state
         return templates.TemplateResponse(
-            request=request, name="candidats.html", context=dict(candidats=data, gender=gender)
+            request=request, name="candidats.html", context=dict(candidats=data, gender=gender, minAge=minAge, maxAge=maxAge)
         )
 
     except PostgresError as e:

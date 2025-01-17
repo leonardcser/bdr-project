@@ -22,31 +22,25 @@
       }
     });
 
+    // Update age filters
+    const minAge = document.getElementById('minAge').value;
+    const maxAge = document.getElementById('maxAge').value;
+    if (minAge) {
+      urlParams.set('minAge', minAge);
+    } else {
+      urlParams.delete('minAge');
+    }
+    if (maxAge) {
+      urlParams.set('maxAge', maxAge);
+    } else {
+      urlParams.delete('maxAge');
+    }
+
     // Construct the new URL
     const newUrl = window.location.pathname + '?' + urlParams.toString();
     window.location = newUrl; // Navigate to the new URL
-  }
-
-  // Function to keep the checkboxes checked based on the URL query parameters
-  window.onload = function() {
-    // Get the URL query parameters
-    const params = new URLSearchParams(window.location.search);
-
-    // Loop through each checkbox and check if its value exists in the URL params
-    const checkboxes = document.querySelectorAll('.gender-filter input[type="checkbox"]');
-    checkboxes.forEach(function(checkbox) {
-      // Check if the checkbox value is in the query string, and set it to checked if true
-      if (params.has('gender') && params.getAll('gender').includes(checkbox.value)) {
-        checkbox.checked = true;
-      } else {
-        checkbox.checked = false;
-      }
-    });
   };
 </script>
-
-
-
 
 <div class="filter-box">
   <label>Filtres</label>
@@ -54,12 +48,42 @@
   <form method="get" action="/candidats" id="filterForm">
     <div class="filter-item gender-filter">
       <label for="gender">Genres</label>
-      <input type="checkbox" name="gender" value="Homme" id="genderHomme" onchange="submitForm()"> Homme<br>
-      <input type="checkbox" name="gender" value="Femme" id="genderFemme" onchange="submitForm()"> Femme<br>  
-      <input type="checkbox" name="gender" value="Autre" id="genderAutre" onchange="submitForm()"> Autre
+      <input type="checkbox" name="gender" value="Homme" {% if "Homme" in gender %}checked{% endif %} id="genderHomme" onchange="submitForm()"> Homme<br>
+      <input type="checkbox" name="gender" value="Femme" {% if "Femme" in gender %}checked{% endif %} id="genderFemme" onchange="submitForm()"> Femme<br>  
+      <input type="checkbox" name="gender" value="Autre" {% if "Autre" in gender %}checked{% endif %} id="genderAutre" onchange="submitForm()"> Autre
     </div>
 
-    <noscript><button type="submit">Appliquer</button></noscript>
+    <div class="filter-box item">
+      <label for="Age">Age:</label>
+      <div class="filter-item">
+        <label for="minAge">Min Age:</label>
+        <input type="number" id="minAge" name="minAge" value="{{ minAge or '' }}" min="0" 
+              onchange="submitForm()" onblur="submitForm()">
+      </div>
+
+      <div class="filter-item">
+        <label for="maxAge">Max Age:</label>
+        <input type="number" id="maxAge" name="maxAge" value="{{ maxAge or '' }}" min="0" 
+              onchange="submitForm()" onblur="submitForm()">
+      </div>  
+    </div>
+
+    <div class="filter-box item">
+      <label for="Age">Expérience:</label>
+      <div class="filter-item">
+        <label for="minExp">Min Exp:</label>
+        <input type="number" id="minExp" name="minExp" value="{{ minExp or '' }}" min="0" 
+              onchange="submitForm()" onblur="submitForm()">
+      </div>
+
+      <div class="filter-item">
+        <label for="maxExp">Max Exp:</label>
+        <input type="number" id="maxExp" name="maxExp" value="{{ maxExp or '' }}" min="0" 
+              onchange="submitForm()" onblur="submitForm()">
+      </div>  
+    </div>
+
+  <noscript><button type="submit">Appliquer</button></noscript>
   </form>
 </div>
 
