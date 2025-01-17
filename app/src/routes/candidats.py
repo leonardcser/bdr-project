@@ -21,6 +21,8 @@ async def get_candidats(
     gender: list[str] = Query([], alias="gender"),
     minAge: int | None = None,
     maxAge: int | None = None,
+    minExp: int | None = None,
+    maxExp: int | None = None,
     ) -> HTMLResponse:
     try:
         base_query = "SELECT * FROM View_Candidat"
@@ -39,9 +41,10 @@ async def get_candidats(
             else:
                 filters.append(f"WHERE ({gender_condition})")
 
+        # If minAge or maxAge is provided, apply the age filter
         if minAge is not None or maxAge is not None:
             age_conditions = []
-            if minAge > 0:
+            if minAge is not None and minAge > 0:
                 age_conditions.append(f"View_Candidat.age >= :minAge")
             if maxAge is not None:
                 age_conditions.append(f"View_Candidat.age <= :maxAge")
@@ -52,20 +55,39 @@ async def get_candidats(
             else:
                 filters.append(f"WHERE ({age_condition})")
 
+         # If minExp or maxExp is provided, apply the experience filter
+        if minExp is not None or maxExp is not None:
+            exp_conditions = []
+            if minExp is not None and minExp > 0:
+                exp_conditions.append(f"View_Candidat.anneesExp >= :minExp")
+            if maxExp is not None:
+                exp_conditions.append(f"View_Candidat.anneesExp <= :maxExp")
+            
+            exp_condition = " AND ".join(exp_conditions)
+            if filters:
+                filters.append(f"AND ({exp_condition})")
+            else:
+                filters.append(f"WHERE ({exp_condition})")
+
         # Combine the base query with filters
         query = f"{base_query} {' '.join(filters)}"
 
-         # Fetch the data from the database
+        # Prepare the values for query substitution
         values = {}
         if idoffre is not None:
             values["idoffre"] = idoffre
-        if minAge is not None and minAge > 0:  # Only include if valid
+        if minAge is not None and minAge > 0:
             values["minAge"] = minAge
-        if maxAge is not None:  # Include maxAge if set
+        if maxAge is not None:
             values["maxAge"] = maxAge
-        print("Generated Query:", query)
-        print("Values:", values)
+        if minExp is not None and minExp > 0:
+            values["minExp"] = minExp
+        if maxExp is not None:
+            values["maxExp"] = maxExp
 
+        # Log the query and values for debugging
+        print("Generated SQL Query: %s", query)
+        print("Bound Values: %s", values)
 
         # Fetch the data from the database
         data = await database.fetch_all(query=query, values=values)
@@ -75,7 +97,15 @@ async def get_candidats(
 
         # Return the template with the filtered data and gender filter state
         return templates.TemplateResponse(
-            request=request, name="candidats.html", context=dict(candidats=data, gender=gender, minAge=minAge, maxAge=maxAge)
+            request=request, name="candidats.html",
+            context=dict(
+                candidats=data, 
+                gender=gender, 
+                minAge=minAge, 
+                maxAge=maxAge, 
+                minExp=minExp, 
+                maxExp=maxExp
+            )
         )
 
     except PostgresError as e:

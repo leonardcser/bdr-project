@@ -36,6 +36,20 @@
       urlParams.delete('maxAge');
     }
 
+    // Update exp filters
+    const minExp = document.getElementById('minExp').value;
+    const maxExp = document.getElementById('maxExp').value;
+    if (minExp) {
+      urlParams.set('minExp', minExp);
+    } else {
+      urlParams.delete('minExp');
+    }
+    if (maxExp) {
+      urlParams.set('maxExp', maxExp);
+    } else {
+      urlParams.delete('maxExp');
+    }
+
     // Construct the new URL
     const newUrl = window.location.pathname + '?' + urlParams.toString();
     window.location = newUrl; // Navigate to the new URL
