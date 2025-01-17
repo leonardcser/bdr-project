@@ -23,22 +23,26 @@
   <label>Filtres</label>
 
   <form method="get" action="/offres" id="filterForm">
-    <div class="filter-item">
+    <div class="filter-sub-box">
       <label for="statut">Tri par statut</label>
-      <select name="statut" id="statut" onchange="submitForm()">
-        <option value="all" {% if statut == "all" %}selected{% endif %}>Toutes les offres</option>
-        <option value="open" {% if statut == "open" %}selected{% endif %}>Offres ouvertes uniquement</option>
-        <option value="closed" {% if statut == "closed" %}selected{% endif %}>Offres closes uniquement</option>
-      </select>
+      <div class="filter-item">
+        <select name="statut" id="statut" onchange="submitForm()">
+          <option value="all" {% if statut == "all" %}selected{% endif %}>Toutes les offres</option>
+          <option value="open" {% if statut == "open" %}selected{% endif %}>Offres ouvertes uniquement</option>
+          <option value="closed" {% if statut == "closed" %}selected{% endif %}>Offres closes uniquement</option>
+        </select>
+      </div>
     </div>
 
-    <div class="filter-item">
+    <div class="filter-sub-box">
       <label for="datePublication">Tri par date de publication</label>
-      <select name="datePublication" id="datePublication" onchange="submitForm()">
-        <option value="" {% if datePublication == "" %}selected{% endif %} disabled>--</option>
-        <option value="recent" {% if datePublication == "recent" %}selected{% endif %}>Plus récentes d'abord</option>
-        <option value="oldest" {% if datePublication == "oldest" %}selected{% endif %}>Plus anciennes d'abord</option>
-      </select>
+      <div class="filter-item">
+        <select name="datePublication" id="datePublication" onchange="submitForm()">
+          <option value="" {% if datePublication == "" %}selected{% endif %} disabled>--</option>
+          <option value="recent" {% if datePublication == "recent" %}selected{% endif %}>Plus récentes d'abord</option>
+          <option value="oldest" {% if datePublication == "oldest" %}selected{% endif %}>Plus anciennes d'abord</option>
+        </select>
+      </div>
     </div>
 
     <noscript><button type="submit">Appliquer</button></noscript>
