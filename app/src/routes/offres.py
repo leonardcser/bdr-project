@@ -41,7 +41,7 @@ async def get_offres(
                 filters.append(f"AND View_Offre.nomposte ILIKE :name")
             else:
                 filters.append(f"WHERE View_Offre.nomposte ILIKE :name")
-            values['name'] = f"{name}%"  # Ensuring proper LIKE search for starting letters
+            values['name'] = f"%{name}%"  # Ensuring proper LIKE search for starting letters
 
         # If datePublication filter is applied, modify the query to include ordering
         if datePublication == "recent":
