@@ -924,10 +924,6 @@ sub {
   border-radius: 4px;
 }
 
-.filter-box .item label {
-  font-size: 0.7rem;
-}
-
 .filter-box label::after {
   content: "";
   position: absolute;
@@ -938,11 +934,63 @@ sub {
   background-color: var(--border);
 }
 
-/* Styling for each filter-item */
+.filter-box form {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  width: fit-content;
+  gap: 2rem;
+  align-items: end;
+}
+
+.filter-sub-box {
+  position: relative;
+  width: 100%;
+  height: 80%;
+  padding: 0.8rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  background-color: var(--accent-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--standard-border-radius);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+}
+
+.filter-sub-box label {
+  position: absolute;
+  top: -0.7rem; 
+  left: 1.2rem; 
+  background-color: var(--accent-bg);
+  font-size: 0.9rem; 
+  color: var(--text);
+  font-weight: bold;
+  padding: 0 0.7rem; 
+  z-index: 1;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.filter-sub-box label::after {
+  content: "";
+  position: absolute;
+  bottom: -0.3rem;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background-color: var(--border);
+}
+
 .filter-item {
   position: relative;
-  width: 200px; /* Adjust this width as needed */
-  margin-top: 0.8rem;
+  width: auto;
+  margin-top: 0.5rem;
+}
+
+.filter-item input[type="number"] {
+  width: 100px;
+  padding: 7px;
 }
 
 /* Label positioning on top of select */
@@ -977,14 +1025,6 @@ sub {
   border-color: var(--accent-color); /* Change the border color on focus */
 }
 
-.gender-filter {
-  border: 1px solid var(--border);
-  border-radius: var(--standard-border-radius); /* Optional, if you want rounded corners */
-  padding: 0.5rem; /* Optional, to add space inside the border */
-  padding-top: 1rem;
-  margin-top: 0.5rem;
-  width: 120%;
-}
 
 input[type="checkbox"] + label,
 input[type="radio"] + label {
