@@ -11,16 +11,21 @@ from models import OffreCreate
 from routes import router
 
 @router.get("/offres", tags=["offres"])
-async def get_offres(request: Request, idCandidat: int | None = None, statut: str = "all", datePublication: str = "") -> HTMLResponse:
+async def get_offres(
+    request: Request, idCandidat: int | None = None,
+    statut: str = "all", datePublication: str = "", name: str = ""
+)-> HTMLResponse:
     try:
         # Base query to select from View_Offre
         base_query = "SELECT * FROM View_Offre"
         filters = []
+        values = {}
 
         # If idCandidat is provided, add the join and filter for idCandidat
         if idCandidat is not None:
             filters.append(f"INNER JOIN Candidat_Offre ON View_Offre.id = Candidat_Offre.idoffre")
             filters.append(f"WHERE Candidat_Offre.idCandidat = :idCandidat")
+            values['idCandidat'] = idCandidat
 
         # If statut is provided (open or closed), apply the corresponding filter
         if statut != "all":
@@ -29,6 +34,14 @@ async def get_offres(request: Request, idCandidat: int | None = None, statut: st
                 filters.append(f"AND View_Offre.{status_condition}")
             else:
                 filters.append(f"WHERE View_Offre.{status_condition}")
+
+        # If name is provided, add a LIKE condition to the query
+        if name:
+            if filters:
+                filters.append(f"AND View_Offre.nomposte ILIKE :name")
+            else:
+                filters.append(f"WHERE View_Offre.nomposte ILIKE :name")
+            values['name'] = f"{name}%"  # Ensuring proper LIKE search for starting letters
 
         # If datePublication filter is applied, modify the query to include ordering
         if datePublication == "recent":
@@ -42,18 +55,19 @@ async def get_offres(request: Request, idCandidat: int | None = None, statut: st
         query = f"{base_query} {' '.join(filters)} {order_by}"
 
         # Fetch the data from the database
-        data = await database.fetch_all(query=query, values=dict(idCandidat=idCandidat) if idCandidat else {})
+        data = await database.fetch_all(query=query, values=values)
 
         return templates.TemplateResponse(
             request=request, 
             name="offres.html", 
-            context=dict(offres=data, idCandidat=idCandidat, statut=statut, datePublication=datePublication)
+            context=dict(offres=data, idCandidat=idCandidat, statut=statut, datePublication=datePublication, name=name)
         )
 
     except PostgresError as e:
         return templates.TemplateResponse(
             request=request, name="error.html", context=dict(error=str(e))
         )
+
 
 
 @router.get("/offres/{id}", tags=["offres"])

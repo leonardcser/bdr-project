@@ -4,15 +4,26 @@
 <h1>Offres</h1>
 
 <script>
-  function submitForm() {
+
+ function submitForm() {
     const form = document.getElementById("filterForm");
     const urlParams = new URLSearchParams(window.location.search);
 
     const statut = document.getElementById("statut").value;
     const datePublication = document.getElementById("datePublication").value;
+    const name = document.getElementById("name").value;
 
     urlParams.set("statut", statut);
-    urlParams.set("datePublication", datePublication);
+
+    if (datePublication != '')
+      urlParams.set("datePublication", datePublication);
+    else
+      urlParams.delete("datePublication");
+
+    if (name != '')
+      urlParams.set("name", name); 
+    else
+      urlParams.delete("name");
 
     const newUrl = "/offres?" + urlParams.toString();  
     window.location = newUrl; 
@@ -42,6 +53,13 @@
           <option value="recent" {% if datePublication == "recent" %}selected{% endif %}>Plus récentes d'abord</option>
           <option value="oldest" {% if datePublication == "oldest" %}selected{% endif %}>Plus anciennes d'abord</option>
         </select>
+      </div>
+    </div>
+
+    <div class="filter-sub-box">
+      <label for="name">Recherche par nom d'offre</label>
+      <div class="filter-item">
+        <input type="text" name="name" id="name" value="{{ name }}" placeholder="Nom de l'offre" oninput="submitForm()">
       </div>
     </div>
 
