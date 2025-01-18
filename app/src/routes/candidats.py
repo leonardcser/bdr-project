@@ -44,7 +44,7 @@ async def get_candidats(
         # If minAge or maxAge is provided, apply the age filter
         if minAge is not None or maxAge is not None:
             age_conditions = []
-            if minAge is not None and minAge > 0:
+            if minAge is not None:
                 age_conditions.append(f"View_Candidat.age >= :minAge")
             if maxAge is not None:
                 age_conditions.append(f"View_Candidat.age <= :maxAge")
@@ -58,7 +58,7 @@ async def get_candidats(
          # If minExp or maxExp is provided, apply the experience filter
         if minExp is not None or maxExp is not None:
             exp_conditions = []
-            if minExp is not None and minExp > 0:
+            if minExp is not None:
                 exp_conditions.append(f"View_Candidat.anneesExp >= :minExp")
             if maxExp is not None:
                 exp_conditions.append(f"View_Candidat.anneesExp <= :maxExp")
@@ -76,11 +76,11 @@ async def get_candidats(
         values = {}
         if idoffre is not None:
             values["idoffre"] = idoffre
-        if minAge is not None and minAge > 0:
+        if minAge is not None:
             values["minAge"] = minAge
         if maxAge is not None:
             values["maxAge"] = maxAge
-        if minExp is not None and minExp > 0:
+        if minExp is not None:
             values["minExp"] = minExp
         if maxExp is not None:
             values["maxExp"] = maxExp
