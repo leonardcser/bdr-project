@@ -1013,6 +1013,7 @@ sub {
   border: 1px solid var(--border);
   border-radius: var(--standard-border-radius);
   width: 100%; /* Ensure select takes up the full width of the container */
+  min-width: 15rem;
   height: auto;
   appearance: none;
   transition: all 0.2s ease;
